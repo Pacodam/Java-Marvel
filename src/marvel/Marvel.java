@@ -10,6 +10,9 @@ import exceptions.MarvelException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.SQLException;
+import java.util.List;
+import model.Superhero;
 
 /**
  *
@@ -19,7 +22,7 @@ public class Marvel {
         
     private static Manager manager;
     private static String[] input; //the line currently readed
-    private static int logged = 0; //0 no logged - 1 logged
+    private static int logged = 0; //0 no logged , 1 logged
     
     public static void main(String[] args) {
         
@@ -27,6 +30,7 @@ public class Marvel {
         //here starts the input data from standard input
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String line;
+        System.out.println(       "***MARVEL STUCOM JAVA***");
         System.out.println("Please, paste data and press return:");
         do{
            try{
@@ -98,10 +102,19 @@ public class Marvel {
     }
     
     /**
-     * 
+     * Case V: view superheroes
      */
-    public static void viewHeros() {
-        
+    public static void viewHeros() throws SQLException {
+        List<Superhero> allHeroes = manager.getSuperheroes();
+        if(allHeroes.isEmpty()){
+            System.out.println("There is no superheroes on the bbdd");
+        }
+        else{
+            System.out.println("- SuperHeroes -");
+            for(Superhero s: allHeroes){
+                System.out.println(s.toString());
+            }
+        }
     }
    
     /**
