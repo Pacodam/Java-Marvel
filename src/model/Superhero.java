@@ -14,7 +14,10 @@ public class Superhero {
     private String name;
     private String superpower;
 
-
+    public Superhero() {}
+    public Superhero(String name){
+        this.name = name;
+    }
     public String getName() {
         return name;
     }

@@ -85,10 +85,10 @@ public class Marvel {
                         //exit();
                         break;
                     default:
-                        //throw new OptionException("Option not allowed");   
+                        throw new MarvelException(MarvelException.WRONG_COMMAND);
                 }
              }
-            }catch (IOException | MarvelException  ex) {
+            }catch (IOException | MarvelException | SQLException  ex) {
                 System.out.println(ex.getMessage());
             }  
         }while(!input[0].equalsIgnoreCase("x"));   
@@ -96,15 +96,22 @@ public class Marvel {
 
     /**
      * Registration of new player
+     * @throws exceptions.MarvelException
+     * @throws java.sql.SQLException
      */
-    public static void registry() {
+    public static void registry() throws MarvelException, SQLException {
+        String username = input[1];
+        String password = input[2];
+        String nameSuperHeroe = input[3];
+        manager.registryUser(username, password, nameSuperHeroe);
+        System.out.println("User registered");
         
     }
     
     /**
      * Case V: view superheroes
      */
-    public static void viewHeros() throws SQLException {
+    public static void viewHeroes() throws SQLException {
         List<Superhero> allHeroes = manager.getSuperheroes();
         if(allHeroes.isEmpty()){
             System.out.println("There is no superheroes on the bbdd");
@@ -117,12 +124,6 @@ public class Marvel {
         }
     }
    
-    /**
-     * 
-     */
-    public static void viewHeroes() {
-        
-    }
     
     /**
      * 

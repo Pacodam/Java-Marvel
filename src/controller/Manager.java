@@ -5,8 +5,10 @@
  */
 package controller;
 
+import exceptions.MarvelException;
 import java.sql.SQLException;
 import java.util.List;
+import model.Place;
 import model.Superhero;
 import persistence.MarvelDAO;
 
@@ -19,7 +21,7 @@ public class Manager {
     private static MarvelDAO marvelDAO;
     
     public Manager() {
-        marvelDAO = new MarvelDAO();
+        marvelDAO = new MarvelDAO();  
     }
     
     
@@ -28,6 +30,16 @@ public class Manager {
       List<Superhero> allHeroes = marvelDAO.selectAllHeroes();
       marvelDAO.disconnect();
       return allHeroes; 
+  }
+  
+  public void registryUser(String username, String password, String nameHeroe) throws SQLException, MarvelException {
+      marvelDAO.connect();
+      //check if user is already registered
+      marvelDAO.checkUsername(username);
+      Superhero s = marvelDAO.getSuperHeroByName(nameHeroe);
+      Place p = marvelDAO.getPlaceByName("New York");
+      
+      marvelDAO.disconnect();
   }
           
 }
