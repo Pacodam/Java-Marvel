@@ -39,5 +39,18 @@ public class MarvelDAO {
         s.setName(rs.getString("name"));
         s.setSuperpower(rs.getString("superpower"));
     }
+    
+    public void connect() throws SQLException {
+        String url = "jdbc:mysql://localhost:3306/marvel";
+        String user = "root";
+        String password = "root";
+        connection = DriverManager.getConnection(url, user, password);
+    }
+
+    public void disconnect() throws SQLException {
+        if (connection != null) {
+            connection.close();
+        }
+    }
 }
 
