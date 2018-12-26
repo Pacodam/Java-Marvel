@@ -90,6 +90,7 @@ public class Marvel {
              }
             }catch (IOException | MarvelException | SQLException  ex) {
                 System.out.println(ex.getMessage());
+                ex.printStackTrace();
             }  
         }while(!input[0].equalsIgnoreCase("x"));   
     }

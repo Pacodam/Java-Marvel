@@ -14,29 +14,155 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import model.Enemy;
+import model.Oponent;
 import model.Place;
 import model.Superhero;
+import model.User;
+import model.gems.Gem;
 
 public class MarvelDAO {
     
     private Connection connection;
-        
-    public List<Place> selectAllPlaces() throws SQLException{
-        
-        
+       
+    
+    public void insertNewUser(User u) throws SQLException {
+        System.out.println(u.getName());
+        System.out.println(u.getPass());
+        System.out.println(u.getLevel());
+        PreparedStatement ps = connection.prepareStatement("insert into user values (?, ?, ?, ?, ?, ?)");
+        ps.setString(1, u.getName());
+        ps.setString(2, u.getPass());
+        ps.setInt(3, u.getLevel());
+        ps.setString(4, u.getSuperhero().getName());
+        ps.setString(5, u.getPlace().getName());
+        ps.setInt(6, u.getPoints());
+        ps.executeUpdate();
+        ps.close();
     }
-    public Place getPlaceByName(String name) throws MarvelException, SQLException {
-        Place aux = new Place(name);
+    
+    public void insertNewGems(List<Gem> newGems) throws SQLException {
+        for(Gem g: newGems){
+            PreparedStatement ps = connection.prepareStatement("insert into gem values (?, ?, ?, ?)");
+            ps.setString(1, g.getName());
+            ps.setString(2, g.getUser().getName());
+            ps.setString(3, g.getOponent().getName());
+            ps.setString(4, g.getPlace().getName());
+            ps.executeUpdate();
+            ps.close();
+        }
+    }
+    
+    public List<Enemy> getEnemies() throws SQLException, MarvelException {
+        List<Enemy> allEnemies = new ArrayList<>();
         Statement st = connection.createStatement();
-        String select = "select * from place where name ='"+name+"'";
+        String select = "select * from enemy";
         ResultSet rs = st.executeQuery(select);
-        Place p = new Place();
-        p.setName(rs.getString("name"));
-        p.setDescription(rs.getString("description"));
-        p.setNorth(rs.getString("north"));
+        while (rs.next()) {
+            Enemy e = new Enemy();
+            fillEnemy( e, rs);
+            allEnemies.add( e);
+        }
         rs.close();
         st.close();
-        return p;
+        return allEnemies;
+    }
+    
+     public void fillEnemy(Enemy e, ResultSet rs) throws SQLException, MarvelException {
+        e.setName(rs.getString("name"));
+        e.setDebility(rs.getString("debility"));
+        e.setLevel(rs.getInt("level"));
+        e.setPlace(getPlaceByName(rs.getString("place")));
+    }
+    
+    public static String[] getNameOfPlaces(){
+        List<Place> allPlaces = new ArrayList<>();
+        String[] placesName = new String[allPlaces.size()];
+        for(int i = 0; i < allPlaces.size(); i++){
+            placesName[i] = allPlaces.get(i).getName();
+        }
+        return placesName;
+    }
+    /**
+     * Returns a list of all places in BBDD.
+     * @return List place
+     * @throws SQLException 
+     */
+    public List<Place> selectAllPlaces() throws SQLException{
+        List<Place> allPlaces = new ArrayList<>();
+        List<String> north = new ArrayList<>();
+        List<String> south = new ArrayList<>();
+        List<String> east = new ArrayList<>();
+        List<String> west = new ArrayList<>();
+        Statement st = connection.createStatement();
+        String select = "select * from place";
+        ResultSet rs = st.executeQuery(select);
+        while (rs.next()) {
+            Place p = new Place();
+            fillPlace(p, rs);
+            allPlaces.add(p);
+            north.add(rs.getString("north"));
+            south.add(rs.getString("south"));
+            east.add(rs.getString("east"));
+            west.add(rs.getString("west"));
+        }
+        rs.close();
+        st.close();
+        addDirections(allPlaces, north, south, east, west);
+       
+        return allPlaces;
+    }
+    
+    public static void addDirections(List<Place> places, List<String> north, List<String> south, List<String> east, List<String> west){
+       for(int i = 0; i < places.size(); i++){
+            Place actual = places.get(i);
+            String n = north.get(i);
+            String s = south.get(i);
+            String e = east.get(i);
+            String w = west.get(i);
+            for(Place p: places){
+                if(p.getName().equals(n)){
+                    actual.setNorth(p);
+                }
+                if(p.getName().equals(s)){
+                    actual.setSouth(p);
+                }
+                if(p.getName().equals(e)){
+                    actual.setEast(p);
+                }
+                if(p.getName().equals(w)){
+                    actual.setWest(p);
+                }
+            }
+            
+       }
+    }
+    /**
+     * Adds name and description to a place object
+     * @param p
+     * @param rs
+     * @throws SQLException 
+     */
+    public void fillPlace(Place p, ResultSet rs) throws SQLException {
+        p.setName(rs.getString("name"));
+        p.setDescription(rs.getString("description"));
+    }
+           
+    /**
+     * Returns a place with all its attributes (included directions Places)
+     * @param name
+     * @return
+     * @throws MarvelException
+     * @throws SQLException 
+     */  
+    public Place getPlaceByName(String name) throws MarvelException, SQLException {
+        List<Place> allPlaces = selectAllPlaces();
+        for(Place p: allPlaces){
+            if(p.getName().equals(name)){
+                return p;
+            }
+        }
+        return null;
     }
     
     /**
@@ -55,8 +181,10 @@ public class MarvelDAO {
         String select = "select * from superhero where name ='"+heroName+"'";
         ResultSet rs = st.executeQuery(select);
         Superhero s = new Superhero();
-        s.setName(rs.getString("name"));
-        s.setSuperpower(rs.getString("superpower"));
+        if(rs.next()){
+          s.setName(rs.getString("name"));
+          s.setSuperpower(rs.getString("superpower"));
+        }
         rs.close();
         st.close();
         return s;

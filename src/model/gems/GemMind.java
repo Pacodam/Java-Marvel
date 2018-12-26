@@ -9,6 +9,6 @@ package model.gems;
  *
  * @author alu2017454
  */
-public class GemMind extends Gem{
+public class GemMind {
     
 }

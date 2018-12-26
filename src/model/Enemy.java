@@ -9,12 +9,28 @@ package model;
  *
  * @author alu2017454
  */
-public class Enemy {
+public class Enemy extends Oponent {
     
-    private String name;
     private String debility;
-    private int level;
     private Place place;
     
+    public Enemy() {}
+    
+    public Enemy(String name, String debility, int level, Place place){
+        super(name, level, place);
+        this.debility = debility;
+    }
+
+    public String getDebility() {
+        return debility;
+    }
+
+    public void setDebility(String debility) {
+        this.debility = debility;
+    }
+    
+    
+
+  
     
 }
