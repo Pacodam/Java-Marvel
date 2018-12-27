@@ -26,6 +26,41 @@ public class MarvelDAO {
     private Connection connection;
        
     
+    public List<Gem> getGemsByPlace(String place){
+        
+        
+    }
+    
+    public User loginCheck(String username, String password) throws SQLException, MarvelException{
+        Statement st = connection.createStatement();
+        String query = "select * from user where username='" + username + "';";
+        ResultSet rs = st.executeQuery(query);
+        boolean exist = rs.next();
+        if(!exist){
+            throw new MarvelException(MarvelException.WRONG_US_PASS);
+        }
+        else if(rs.getString("pass").equals("password")){
+             throw new MarvelException(MarvelException.WRONG_US_PASS);
+        }
+        User u = new User();
+        fillUser(rs, u);
+        rs.close();
+        st.close();
+        
+        return u;
+    }
+    
+    public void fillUser(ResultSet rs, User u) throws SQLException, MarvelException{
+        u.setName(rs.getString("username"));
+        u.setPass(rs.getString("pass"));
+        u.setLevel(rs.getInt("level"));
+        u.setSuperhero(getSuperHeroByName(rs.getString("superhero")));
+        u.setPlace(getPlaceByName(rs.getString("place")));
+        u.setPoints(rs.getInt("points"));
+    }
+     
+    
+    
     public void insertNewUser(User u) throws SQLException {
         System.out.println(u.getName());
         System.out.println(u.getPass());

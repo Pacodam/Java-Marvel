@@ -33,6 +33,34 @@ public class Manager {
     }
     
     
+  public List<String> getGemsByPlace(String place)  throws SQLException, MarvelException {
+       marvelDAO.connect();
+       List<Gem> gemsHere = marvelDAO.getGemsByPlace();
+       marvelDAO.disconnect();
+       
+      
+  }
+  public List<String> getEnemies(String place) throws SQLException, MarvelException {
+      marvelDAO.connect();
+      List<Enemy> allEnemies = marvelDAO.getEnemies();
+      marvelDAO.disconnect();
+      List<String> enemies = new ArrayList<String>();
+      for(Enemy e: allEnemies){
+          if(e.getPlace().getName().equals(place)){
+              enemies.add(e.getName());
+          }
+      }
+      return enemies;
+  }
+  
+  public User userLogin(String username, String password) throws SQLException, MarvelException{
+      //check if username and password is correct
+      marvelDAO.connect();
+      User u = marvelDAO.loginCheck(username, password);
+      marvelDAO.disconnect();
+      return u;
+  }
+  
   public List<Superhero> getSuperheroes() throws SQLException {
       marvelDAO.connect();
       List<Superhero> allHeroes = marvelDAO.selectAllHeroes();

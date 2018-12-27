@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.List;
 import model.Superhero;
+import model.User;
 
 /**
  *
@@ -22,7 +23,7 @@ public class Marvel {
         
     private static Manager manager;
     private static String[] input; //the line currently readed
-    private static int logged = 0; //0 no logged , 1 logged
+    private static User userLogged;
     
     public static void main(String[] args) {
         
@@ -127,10 +128,38 @@ public class Marvel {
    
     
     /**
-     * 
+     * Case L: login
      */
-    public static void login() {
+    public static void login() throws SQLException, MarvelException {
+        String username = input[1];
+        String password = input[2];
+        //check username and password for login
+        userLogged = manager.userLogin(username, password);
+        System.out.println("Welcome, "+ userLogged.getName());
+        System.out.println("Place: "+ userLogged.getPlace().getName());
+        System.out.println("Place: "+ userLogged.getPlace().getDescription());
+        System.out.println("---");
         
+        //obtain enemies in user place
+        List<String> enemiesHere = manager.getEnemies(userLogged.getPlace().getName());
+        if(enemiesHere.isEmpty()){
+            System.out.println("There is nobody here");
+        }
+        else{
+            for(String s: enemiesHere){
+                System.out.print(s + ", ");
+            }
+        }
+        //obtain gems in user place
+        List<String> gemsHere = manager.getGemsByPlace(userLogged.getPlace().getName());
+        if(gemsHere.isEmpty()){
+            System.out.println("There is nobody here");
+        }
+        else{
+            for(String s: gemsHere){
+                System.out.print(s + ", ");
+            }
+        }
     }
     
     /**
@@ -184,7 +213,7 @@ public class Marvel {
      * @throws MarvelException - User not logged
      */
     public static void testLogin() throws MarvelException {
-        if(logged == 0){
+        if(userLogged == null){
             throw new MarvelException(MarvelException.NOT_LOGGED);
         }
     }
