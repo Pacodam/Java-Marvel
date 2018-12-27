@@ -50,41 +50,51 @@ public class Manager {
       Place newYork = marvelDAO.getPlaceByName("New York");
       //a new player is created
       if(newYork != null){
-        newUser = new User(username, password, s, newYork);
+        newUser = new User(username, password, 1,  s, newYork);
       }
       //we get the enemies
       List<Enemy> allEnemies = marvelDAO.getEnemies();
+      
       //we create the new gem pack for the player (using a separated method)
       List<Gem> gemsPack = createGems(allEnemies);
+   
       //finally, we can save into the bbdd 1) the new player, 2)the new gems pack
       marvelDAO.insertNewUser((User) newUser);
       marvelDAO.insertNewGems(gemsPack);
+      
       marvelDAO.disconnect();
   }
   
   public static List<Gem> createGems(List<Enemy> allEnemies) throws MarvelException, SQLException {
       List<Gem> gemsPack = new ArrayList<>();
       String[] gems = {"Mind Gem", "Power Gem", "Reality Gem", "Soul Gem", "Space Gem", "Time Gem"};
+      //why not do directly with Places?
       String[] places = marvelDAO.getNameOfPlaces();
       List<String> placesFilled = new ArrayList<>();
       placesFilled.add(newUser.getPlace().getName());
       for(int i = 0; i < gems.length; i++){
           gemsPack.add(new Gem(gems[i]));
       }
+      List<Enemy> enemiesForRand = new ArrayList<>();
       for(Gem g: gemsPack){
           String newPlace = null;
           do{
-              newPlace = gems[randGen(0, gems.length-1)];
+              newPlace = places[randGen(0, places.length-1)];
           }while(placesFilled.contains(newPlace));
+          placesFilled.add(newPlace);
           g.setPlace(marvelDAO.getPlaceByName(newPlace));
           g.setUser((User) newUser);
-          //TODO y si hay más de un villano en un lugar?
+          //If there is more than 1 villain, we use random
           for(Enemy e: allEnemies){
               if(e.getPlace().getName().equals(newPlace)){
-                  g.setOponent(e);
+                  enemiesForRand.add(e);
               }
-          }
-          
+           }
+           if(!enemiesForRand.isEmpty()){
+             int rand = randGen(0, enemiesForRand.size()-1);
+             g.setOponent(enemiesForRand.get(rand)); 
+             enemiesForRand.clear();
+           }
       }
       return gemsPack;
   }

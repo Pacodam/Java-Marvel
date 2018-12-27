@@ -45,6 +45,11 @@ public abstract class Oponent {
     public void setPlace(Place place) {
         this.place = place;
     }
+
+    @Override
+    public String toString() {
+        return "Oponent{" + "name=" + name + ", level=" + level + ", place=" + place + '}';
+    }
     
     
     

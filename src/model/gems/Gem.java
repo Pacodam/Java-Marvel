@@ -16,18 +16,18 @@ import model.User;
 public class Gem {
     private String name;
     private User user;
-    private Oponent oponent;
+    private Oponent oponent; //the owner can be a User or an Enemy (both subclasses of Oponent)
     private Place place;
 
     
     public Gem(String name){
-        this.name = name;
+        this.name = name; System.out.println("name "+ name);
     }
     public Gem(String name, User user, Oponent oponent, Place place) {
-        this.name = name;
-        this.user = user;
-        this.oponent = oponent;
-        this.place = place;
+        this.name = name; 
+        this.user = user; 
+        this.oponent = oponent; 
+        this.place = place; 
     }
 
     public String getName() {
@@ -43,7 +43,7 @@ public class Gem {
     }
 
     public void setUser(User user) {
-        this.user = user;
+        this.user = user; System.out.println("user " + user.getName());
     }
 
     public Oponent getOponent() {
@@ -51,7 +51,14 @@ public class Gem {
     }
 
     public void setOponent(Oponent oponent) {
-        this.oponent = oponent;
+        this.oponent = oponent; System.out.println("oponent " + oponent.getName());
+    }
+    
+    public String getOponentName(){
+        if(oponent != null){
+            return oponent.getName();
+        }
+        return " ";
     }
 
     public Place getPlace() {
@@ -59,7 +66,13 @@ public class Gem {
     }
 
     public void setPlace(Place place) {
-        this.place = place;
+        this.place = place; System.out.println("place " + place.getName());
+    }
+
+    @Override
+    public String toString() {
+        return "Gem{" + "name=" + name + ", user=" + user.getName() + ", oponent=" + getOponentName() + ", place=" + place.getName() + '}';
+   
     }
     
     

@@ -46,7 +46,13 @@ public class MarvelDAO {
             PreparedStatement ps = connection.prepareStatement("insert into gem values (?, ?, ?, ?)");
             ps.setString(1, g.getName());
             ps.setString(2, g.getUser().getName());
-            ps.setString(3, g.getOponent().getName());
+            //A gem can have a null owner at the beginning
+            if(g.getOponent() != null){
+              ps.setString(3, g.getOponent().getName());
+            }
+            else{
+               ps.setNull(3, java.sql.Types.VARCHAR);
+            }
             ps.setString(4, g.getPlace().getName());
             ps.executeUpdate();
             ps.close();
@@ -75,8 +81,8 @@ public class MarvelDAO {
         e.setPlace(getPlaceByName(rs.getString("place")));
     }
     
-    public static String[] getNameOfPlaces(){
-        List<Place> allPlaces = new ArrayList<>();
+    public  String[] getNameOfPlaces() throws SQLException{
+        List<Place> allPlaces = selectAllPlaces();
         String[] placesName = new String[allPlaces.size()];
         for(int i = 0; i < allPlaces.size(); i++){
             placesName[i] = allPlaces.get(i).getName();

@@ -18,8 +18,8 @@ public class User extends Oponent {
     private int points;
     
     
-    public User(String name, String pass, Superhero superhero, Place place){
-        super(name, 1, place);
+    public User(String name, String pass, int level, Superhero superhero, Place place){
+        super(name, level, place);
         this.pass = pass;
         this.superhero = superhero;
         this.points = 0;    
