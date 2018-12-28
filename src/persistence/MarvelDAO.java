@@ -26,9 +26,28 @@ public class MarvelDAO {
     private Connection connection;
        
     
-    public List<Gem> getGemsByPlace(String place){
-        
-        
+    /**
+     * returns Gem list from a given Place 
+     * @param place
+     * @return 
+     */
+    public List<Gem> getGemsByPlace(String username, String place) throws SQLException, MarvelException{
+        List<Gem> gemsFree = new ArrayList<>();
+        Statement st = connection.createStatement();
+        String query = "select * from gem where place='" + place + "' and user='" + username + "';";
+        ResultSet rs = st.executeQuery(query);
+        while (rs.next()) {
+            Gem gem = new Gem();
+            fillGem(gem, rs);
+            gemsFree.add(gem);
+        }
+        rs.close();
+        st.close();
+        return gemsFree;
+    }
+    
+    public static void fillGem(Gem gem, ResultSet rs) throws SQLException{
+        gem.setName(rs.getString("name"));  
     }
     
     public User loginCheck(String username, String password) throws SQLException, MarvelException{

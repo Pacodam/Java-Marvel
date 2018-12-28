@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.List;
+import model.Place;
 import model.Superhero;
 import model.User;
 
@@ -23,7 +24,10 @@ public class Marvel {
         
     private static Manager manager;
     private static String[] input; //the line currently readed
+    
     private static User userLogged;
+    private static List<String> currentDirections;
+    private static List<String> currentFreeGems;
     
     public static void main(String[] args) {
         
@@ -150,15 +154,25 @@ public class Marvel {
                 System.out.print(s + ", ");
             }
         }
+        System.out.println("\n---");
+        
         //obtain gems in user place
-        List<String> gemsHere = manager.getGemsByPlace(userLogged.getPlace().getName());
-        if(gemsHere.isEmpty()){
-            System.out.println("There is nobody here");
+        currentFreeGems = manager.getGemsByPlace(userLogged.getName(), userLogged.getPlace().getName());
+        if(currentFreeGems.isEmpty()){
+            System.out.println("There are no gems here");
         }
         else{
-            for(String s: gemsHere){
+            for(String s: currentFreeGems){
                 System.out.print(s + ", ");
             }
+        }
+        System.out.println("\n---");
+        
+        //obtain possible moving directions
+        System.out.println("You can go:");
+        currentDirections = manager.getPlacesToGo(userLogged.getPlace());
+        for(String p: currentDirections){
+            System.out.print(p + ", ");
         }
     }
     

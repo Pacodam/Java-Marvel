@@ -32,14 +32,43 @@ public class Manager {
         marvelDAO = new MarvelDAO();  
     }
     
-    
-  public List<String> getGemsByPlace(String place)  throws SQLException, MarvelException {
-       marvelDAO.connect();
-       List<Gem> gemsHere = marvelDAO.getGemsByPlace();
-       marvelDAO.disconnect();
-       
-      
+  
+  public List<String> getPlacesToGo(Place place){
+      List<String> directions = new ArrayList<>();
+      if(place.getNorth() != null){
+          directions.add("N");
+          //directions.add(place.getNorth().getName());
+      }
+      if(place.getSouth() != null){
+          directions.add("S");
+          //directions.add(place.getSouth().getName());
+      }
+      if(place.getEast() != null){
+          directions.add("E");
+          //directions.add(place.getEast().getName());
+      }
+      if(place.getWest() != null){
+          directions.add("W");
+          //directions.add(place.getWest().getName());
+      }
+      return directions;
   }
+    
+  public List<String> getGemsByPlace(String username, String place)  throws SQLException, MarvelException {
+       marvelDAO.connect();
+       List<Gem> gems = marvelDAO.getGemsByPlace(username, place);
+       marvelDAO.disconnect();
+       List<String> gemsHere = new ArrayList<>();
+       //we only want gems not owned by anyone
+       for(Gem g: gems){
+           if(g.getOponent() != null){
+               gemsHere.add(g.getName());
+           }  
+       }
+       System.out.println(gemsHere.size());
+       return gemsHere;
+  }
+  
   public List<String> getEnemies(String place) throws SQLException, MarvelException {
       marvelDAO.connect();
       List<Enemy> allEnemies = marvelDAO.getEnemies();

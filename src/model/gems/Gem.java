@@ -19,9 +19,10 @@ public class Gem {
     private Oponent oponent; //the owner can be a User or an Enemy (both subclasses of Oponent)
     private Place place;
 
+    public Gem() {}
     
     public Gem(String name){
-        this.name = name; System.out.println("name "+ name);
+        this.name = name;
     }
     public Gem(String name, User user, Oponent oponent, Place place) {
         this.name = name; 
@@ -43,7 +44,7 @@ public class Gem {
     }
 
     public void setUser(User user) {
-        this.user = user; System.out.println("user " + user.getName());
+        this.user = user; 
     }
 
     public Oponent getOponent() {
@@ -51,7 +52,7 @@ public class Gem {
     }
 
     public void setOponent(Oponent oponent) {
-        this.oponent = oponent; System.out.println("oponent " + oponent.getName());
+        this.oponent = oponent; 
     }
     
     public String getOponentName(){
@@ -66,7 +67,7 @@ public class Gem {
     }
 
     public void setPlace(Place place) {
-        this.place = place; System.out.println("place " + place.getName());
+        this.place = place; 
     }
 
     @Override
