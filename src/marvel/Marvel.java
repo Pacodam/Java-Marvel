@@ -144,36 +144,7 @@ public class Marvel {
         System.out.println("Place: "+ userLogged.getPlace().getDescription());
         System.out.println("---");
         
-        //obtain enemies in user place
-        List<String> enemiesHere = manager.getEnemies(userLogged.getPlace().getName());
-        if(enemiesHere.isEmpty()){
-            System.out.println("There is nobody here");
-        }
-        else{
-            for(String s: enemiesHere){
-                System.out.print(s + ", ");
-            }
-        }
-        System.out.println("\n---");
-        
-        //obtain gems in user place
-        currentFreeGems = manager.getGemsByPlace(userLogged.getName(), userLogged.getPlace().getName());
-        if(currentFreeGems.isEmpty()){
-            System.out.println("There are no gems here");
-        }
-        else{
-            for(String s: currentFreeGems){
-                System.out.print(s + ", ");
-            }
-        }
-        System.out.println("\n---");
-        
-        //obtain possible moving directions
-        System.out.println("You can go:");
-        currentDirections = manager.getPlacesToGo(userLogged.getPlace());
-        for(String p: currentDirections){
-            System.out.print(p + ", ");
-        }
+        showPlaceInfo();
     }
     
     /**
@@ -193,13 +164,21 @@ public class Marvel {
     /**
      * 
      */
-    public static void move() {
-        
+    public static void move() throws MarvelException, SQLException {
+        String direction = input[0];
+        if(!currentDirections.contains(direction.toUpperCase())){
+            throw new MarvelException(MarvelException.MOVE_UNALLOWED);
+        }
+        System.out.println("Moving to " + direction + "...");
+        System.out.println("actual place " + userLogged.getPlace().getName());
+        userLogged = manager.moveUser(direction, userLogged);
+        System.out.println("new place " + userLogged.getPlace().getName());
+        userLogged.getPlace().getName();
+        showPlaceInfo();
     }
     
-    /**
-     * 
-     */
+    
+ 
     public static void delete() {
         
     }
@@ -209,6 +188,40 @@ public class Marvel {
      */
     public static void ranking() {
         
+    }
+    
+    public static void showPlaceInfo() throws SQLException, MarvelException{
+        //obtain enemies in user place
+        List<String> enemiesHere = manager.getEnemies(userLogged.getPlace().getName());
+        if(enemiesHere.isEmpty()){
+            System.out.println("There is nobody here");
+        }
+        else{
+            System.out.println("- Enemies -");
+            for(String s: enemiesHere){
+                System.out.print(s + ", ");
+            }
+        }
+        System.out.println("\n---");
+        //obtain gems in user place
+        currentFreeGems = manager.getGemsByPlace(userLogged.getName(), userLogged.getPlace().getName());
+        if(currentFreeGems.isEmpty()){
+            System.out.println("There are no gems here");
+        }
+        else{
+            System.out.println("- Free gems -");
+            for(String s: currentFreeGems){
+                System.out.print(s + ", ");
+            }
+        }
+        System.out.println("\n---");
+        //obtain possible moving directions
+        System.out.println("You can go:");
+        currentDirections = manager.getPlacesToGo(userLogged.getPlace());
+        for(String p: currentDirections){
+            System.out.print(p + ", ");
+        }
+         System.out.println("\n---");
     }
     
     /**

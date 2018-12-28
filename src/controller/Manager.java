@@ -31,7 +31,39 @@ public class Manager {
     public Manager() {
         marvelDAO = new MarvelDAO();  
     }
+  
     
+  public void modifyUser(User user){
+      
+  }
+  
+  public User moveUser(String direction, User user) throws MarvelException, SQLException {
+      marvelDAO.connect();
+      switch(direction.toLowerCase()){
+            case "n":{
+                Place newPlace = marvelDAO.getPlaceByName(user.getPlace().getNorth().getName());
+                user.setPlace(newPlace);
+                break;
+            }
+            case "s":{
+                Place newPlace = marvelDAO.getPlaceByName(user.getPlace().getSouth().getName());
+                user.setPlace(newPlace);
+                break;
+            }
+            case "e":{
+                Place newPlace = marvelDAO.getPlaceByName(user.getPlace().getEast().getName());
+                user.setPlace(newPlace);
+                break;
+            }
+            case "w":{
+                Place newPlace = marvelDAO.getPlaceByName(user.getPlace().getWest().getName());
+                user.setPlace(newPlace);
+                break;
+            }
+        }
+       marvelDAO.disconnect();
+      return user;
+  }
   
   public List<String> getPlacesToGo(Place place){
       List<String> directions = new ArrayList<>();
