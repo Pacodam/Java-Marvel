@@ -140,10 +140,6 @@ public class Marvel {
         //check username and password for login
         userLogged = manager.userLogin(username, password);
         System.out.println("Welcome, "+ userLogged.getName());
-        System.out.println("Place: "+ userLogged.getPlace().getName());
-        System.out.println("Place: "+ userLogged.getPlace().getDescription());
-        System.out.println("---");
-        
         showPlaceInfo();
     }
     
@@ -170,15 +166,12 @@ public class Marvel {
             throw new MarvelException(MarvelException.MOVE_UNALLOWED);
         }
         System.out.println("Moving to " + direction + "...");
-        System.out.println("actual place " + userLogged.getPlace().getName());
         userLogged = manager.moveUser(direction, userLogged);
-        System.out.println("new place " + userLogged.getPlace().getName());
         userLogged.getPlace().getName();
         showPlaceInfo();
+        manager.updateUserPlace(userLogged);
     }
     
-    
- 
     public static void delete() {
         
     }
@@ -191,6 +184,9 @@ public class Marvel {
     }
     
     public static void showPlaceInfo() throws SQLException, MarvelException{
+        System.out.println("Place: "+ userLogged.getPlace().getName());
+        System.out.println("Place: "+ userLogged.getPlace().getDescription());
+        System.out.println("---");
         //obtain enemies in user place
         List<String> enemiesHere = manager.getEnemies(userLogged.getPlace().getName());
         if(enemiesHere.isEmpty()){

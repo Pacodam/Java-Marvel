@@ -37,6 +37,13 @@ public class Manager {
       
   }
   
+  public void updateUserPlace(User user) throws SQLException{
+      marvelDAO.connect();
+      marvelDAO.updateUserPlace(user);
+      marvelDAO.disconnect();
+      
+  }
+  
   public User moveUser(String direction, User user) throws MarvelException, SQLException {
       marvelDAO.connect();
       switch(direction.toLowerCase()){
@@ -93,11 +100,10 @@ public class Manager {
        List<String> gemsHere = new ArrayList<>();
        //we only want gems not owned by anyone
        for(Gem g: gems){
-           if(g.getOponent() != null){
+           if(g.getOponent() == null){
                gemsHere.add(g.getName());
            }  
        }
-       System.out.println(gemsHere.size());
        return gemsHere;
   }
   

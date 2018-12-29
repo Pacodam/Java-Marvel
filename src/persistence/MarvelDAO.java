@@ -26,19 +26,30 @@ public class MarvelDAO {
     private Connection connection;
        
     
+    
+    public void updateUserPlace(User user) throws SQLException{
+        Statement st = connection.createStatement();
+        String username = user.getName();
+        String newPlace = user.getPlace().getName();
+        String update = "update user set place='" + newPlace + "' where username='"+ username + "'";
+        st.executeUpdate(update);
+        st.close();
+    }
+    
     /**
      * returns Gem list from a given Place 
      * @param place
      * @return 
      */
     public List<Gem> getGemsByPlace(String username, String place) throws SQLException, MarvelException{
+        //basta con pasar al userrrr
         List<Gem> gemsFree = new ArrayList<>();
         Statement st = connection.createStatement();
         String query = "select * from gem where place='" + place + "' and user='" + username + "';";
         ResultSet rs = st.executeQuery(query);
         while (rs.next()) {
             Gem gem = new Gem();
-            fillGem(gem, rs);
+            fillGem(gem, rs, username, place);
             gemsFree.add(gem);
         }
         rs.close();
@@ -46,8 +57,44 @@ public class MarvelDAO {
         return gemsFree;
     }
     
-    public static void fillGem(Gem gem, ResultSet rs) throws SQLException{
-        gem.setName(rs.getString("name"));  
+    public void fillGem(Gem gem, ResultSet rs, String username, String place) throws SQLException, MarvelException{
+        gem.setName(rs.getString("name"));
+        gem.setUser(userByName(username));
+        String owner = rs.getString("owner");
+        if(owner == null){
+          gem.setOponent(null);
+        }
+        else if(owner.equals(username)){
+            gem.setOponent(userByName(username));
+        }
+        else{
+           gem.setOponent(enemyByName(owner)) ;
+        }
+        gem.setPlace(getPlaceByName(place));
+    }
+    
+    public User userByName(String username) throws SQLException, MarvelException{
+        Statement st = connection.createStatement();
+        String query = "select * from user where username='" + username + "';";
+        ResultSet rs = st.executeQuery(query);
+        boolean exist = rs.next();
+        User u = new User();
+        fillUser(rs, u);
+        rs.close();
+        st.close();
+        return u;
+    }
+    
+    public Enemy enemyByName(String name) throws SQLException, MarvelException {
+        Statement st = connection.createStatement();
+        String query = "select * from enemy where username='" + name + "';";
+        ResultSet rs = st.executeQuery(query);
+        boolean exist = rs.next();
+        Enemy e = new Enemy();
+        fillEnemy(e, rs);
+        rs.close();
+        st.close();
+        return e;
     }
     
     public User loginCheck(String username, String password) throws SQLException, MarvelException{
@@ -65,7 +112,6 @@ public class MarvelDAO {
         fillUser(rs, u);
         rs.close();
         st.close();
-        
         return u;
     }
     
