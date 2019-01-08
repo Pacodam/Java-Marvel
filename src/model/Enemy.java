@@ -28,6 +28,13 @@ public class Enemy extends Oponent {
     public void setDebility(String debility) {
         this.debility = debility;
     }
+
+    @Override
+    public String toString() {
+        return "Name: "+ super.getName() + "- Debility:" + debility + " - Level: " + super.getLevel();
+    }
+    
+    
     
     
     

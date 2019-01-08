@@ -114,7 +114,7 @@ public class Manager {
       List<String> enemies = new ArrayList<String>();
       for(Enemy e: allEnemies){
           if(e.getPlace().getName().equals(place)){
-              enemies.add(e.getName());
+              enemies.add(e.toString());
           }
       }
       return enemies;

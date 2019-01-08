@@ -105,7 +105,7 @@ public class MarvelDAO {
         if(!exist){
             throw new MarvelException(MarvelException.WRONG_US_PASS);
         }
-        else if(rs.getString("pass").equals("password")){
+        else if(!rs.getString("pass").equals(password)){
              throw new MarvelException(MarvelException.WRONG_US_PASS);
         }
         User u = new User();
@@ -115,6 +115,13 @@ public class MarvelDAO {
         return u;
     }
     
+    /**
+     * Creates User object
+     * @param rs ResultSet
+     * @param u User
+     * @throws SQLException
+     * @throws MarvelException 
+     */
     public void fillUser(ResultSet rs, User u) throws SQLException, MarvelException{
         u.setName(rs.getString("username"));
         u.setPass(rs.getString("pass"));

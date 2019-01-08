@@ -195,7 +195,7 @@ public class Marvel {
         else{
             System.out.println("- Enemies -");
             for(String s: enemiesHere){
-                System.out.print(s + ", ");
+                System.out.println(s);
             }
         }
         System.out.println("\n---");
