@@ -5,6 +5,10 @@
  */
 package model;
 
+import java.util.ArrayList;
+import java.util.List;
+import model.gems.Gem;
+
 
 
 /**
@@ -16,6 +20,7 @@ public class User extends Oponent {
     private String pass;
     private Superhero superhero;
     private int points;
+    private List<Gem> gemsOwned;
     
     
     public User() {}
@@ -24,8 +29,18 @@ public class User extends Oponent {
         super(name, level, place);
         this.pass = pass;
         this.superhero = superhero;
-        this.points = 0;    
+        this.points = 0;
     }
+
+    public List<Gem> getGemsOwned() {
+        return gemsOwned;
+    }
+
+    public void setGemsOwned(List<Gem> gemsOwned) {
+        this.gemsOwned = gemsOwned;
+    }
+    
+    
 
 
     public String getPass() {

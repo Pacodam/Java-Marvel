@@ -26,6 +26,7 @@ public class MarvelException extends Exception {
     public static final int ENEMY_NO_EXISTS_HERE = 9;
     public static final int DELETE_ABORT = 10;
     
+    
     private int code;
     
     private final List<String> messages = Arrays.asList(
@@ -39,7 +40,8 @@ public class MarvelException extends Exception {
         "[ Here there is no gem with that name ]",
         "[ You already finish your game ]",
         "[ Here there is no enemy with that name ]",
-        "[ Delete aborted. Your password is wrong ]");
+        "[ Delete aborted. Your password is wrong ]"
+      );
            
             
     public MarvelException(int code) {

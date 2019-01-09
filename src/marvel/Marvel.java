@@ -15,6 +15,7 @@ import java.util.List;
 import model.Place;
 import model.Superhero;
 import model.User;
+import model.gems.Gem;
 
 /**
  *
@@ -132,12 +133,13 @@ public class Marvel {
    
     
     /**
-     * Case L: login
+     * Case L: login. 
      */
     public static void login() throws SQLException, MarvelException {
         String username = input[1];
         String password = input[2];
-        //check username and password for login
+        //check username and password for login, we receive a Player object
+        //when user logs on the game, his gems owned are included on the User created
         userLogged = manager.userLogin(username, password);
         System.out.println("Welcome, "+ userLogged.getName());
         showPlaceInfo();
@@ -146,7 +148,14 @@ public class Marvel {
     /**
      * 
      */
-    public static void getGem() {
+    public static void getGem() throws SQLException, MarvelException {
+       
+        String gem = input[1] + " " + input[2];
+        manager.getFreeGem(userLogged, gem);
+        if(userLogged.getGemsOwned().size() < 6){
+            System.out.println("");
+        }
+        
         
     }
     

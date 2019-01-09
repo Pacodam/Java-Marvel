@@ -32,10 +32,39 @@ public class Manager {
         marvelDAO = new MarvelDAO();  
     }
   
-    
+  
   public void modifyUser(User user){
-      
+      // TODO
   }
+  
+  
+  
+  public void getFreeGem(User player, String gem) throws SQLException, MarvelException{
+      marvelDAO.connect();
+      //first we get gems in player actual place
+      List<Gem> gemsInPlace = marvelDAO.getGemsByPlace(player.getName(), player.getPlace().getName());
+      marvelDAO.disconnect();
+      //1) we check the name of the gem and check if it is free
+      boolean existsGem = false;
+      boolean gemIsFree = false;
+      for(Gem g: gemsInPlace){
+          if(g.getName().equals(gem)){
+              existsGem = true;
+              if(g.getOponent()== null) {
+                  gemIsFree = true;
+                  player.getGemsOwned().add(g);
+              }
+          }  
+      }
+      //2) we check if some error must be throwed
+      if(!existsGem){
+          throw new MarvelException(MarvelException.NO_GEM_NAME);
+      }
+      if(!gemIsFree){
+          throw new MarvelException(MarvelException.NO_GEM_NAME);
+      }   
+  }
+  
   
   public void updateUserPlace(User user) throws SQLException{
       marvelDAO.connect();
