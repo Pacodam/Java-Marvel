@@ -41,9 +41,8 @@ public class Manager {
   
   public void getFreeGem(User player, String gem) throws SQLException, MarvelException{
       marvelDAO.connect();
-      //first we get gems in player actual place
-      List<Gem> gemsInPlace = marvelDAO.getGemsByPlace(player.getName(), player.getPlace().getName());
-      marvelDAO.disconnect();
+      //first we get gems in player actual place (all of them)
+      List<Gem> gemsInPlace = marvelDAO.getGemsByPlace(player);
       //1) we check the name of the gem and check if it is free
       boolean existsGem = false;
       boolean gemIsFree = false;
@@ -57,12 +56,14 @@ public class Manager {
           }  
       }
       //2) we check if some error must be throwed
-      if(!existsGem){
+      if(!existsGem || !gemIsFree){
           throw new MarvelException(MarvelException.NO_GEM_NAME);
+      } 
+      else{
+          //3. Update database gem table
+          marvelDAO.updateGems(player, gem);
       }
-      if(!gemIsFree){
-          throw new MarvelException(MarvelException.NO_GEM_NAME);
-      }   
+       marvelDAO.disconnect();
   }
   
   
@@ -122,9 +123,9 @@ public class Manager {
       return directions;
   }
     
-  public List<String> getGemsByPlace(String username, String place)  throws SQLException, MarvelException {
+  public List<String> getGemsByPlace(User player)  throws SQLException, MarvelException {
        marvelDAO.connect();
-       List<Gem> gems = marvelDAO.getGemsByPlace(username, place);
+       List<Gem> gems = marvelDAO.getGemsByPlace(player);
        marvelDAO.disconnect();
        List<String> gemsHere = new ArrayList<>();
        //we only want gems not owned by anyone
@@ -153,6 +154,9 @@ public class Manager {
       //check if username and password is correct
       marvelDAO.connect();
       User u = marvelDAO.loginCheck(username, password);
+      if(u.getGemsOwned().size() == 6){
+          u.setGameFinished(true);
+      }
       marvelDAO.disconnect();
       return u;
   }

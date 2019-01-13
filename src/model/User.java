@@ -21,6 +21,7 @@ public class User extends Oponent {
     private Superhero superhero;
     private int points;
     private List<Gem> gemsOwned;
+    private boolean gameFinished;
     
     
     public User() {}
@@ -39,10 +40,15 @@ public class User extends Oponent {
     public void setGemsOwned(List<Gem> gemsOwned) {
         this.gemsOwned = gemsOwned;
     }
-    
-    
 
+    public boolean isGameFinished() {
+        return gameFinished;
+    }
 
+    public void setGameFinished(boolean gameFinished) {
+        this.gameFinished = gameFinished;
+    }
+    
     public String getPass() {
         return pass;
     }

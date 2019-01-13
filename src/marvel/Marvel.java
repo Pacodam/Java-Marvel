@@ -75,7 +75,9 @@ public class Marvel {
                     case "w":   //desplazamiento, length 1, login
                         testLength(1);
                         testLogin();
-                        move();
+                        if(!testGameFinished()){
+                           move();
+                        }
                         break;
                     case "d": //borrar usuario, length 2, login
                         testLength(2);
@@ -151,9 +153,13 @@ public class Marvel {
     public static void getGem() throws SQLException, MarvelException {
        
         String gem = input[1] + " " + input[2];
+        //the manager will add the new gem to the user in the database, or return an exception if any problem is found
         manager.getFreeGem(userLogged, gem);
+        System.out.println("You have got the gem");
+        //time to check if the player owns the 6 gems already
         if(userLogged.getGemsOwned().size() < 6){
-            System.out.println("");
+            System.out.println("YOU WINN!! YOU HAVE ALL GEMS!!");
+            userLogged.setGameFinished(true);
         }
         
         
@@ -209,7 +215,7 @@ public class Marvel {
         }
         System.out.println("\n---");
         //obtain gems in user place
-        currentFreeGems = manager.getGemsByPlace(userLogged.getName(), userLogged.getPlace().getName());
+        currentFreeGems = manager.getGemsByPlace(userLogged);
         if(currentFreeGems.isEmpty()){
             System.out.println("There are no gems here");
         }
@@ -248,5 +254,17 @@ public class Marvel {
         if(userLogged == null){
             throw new MarvelException(MarvelException.NOT_LOGGED);
         }
+    }
+    
+    /**
+     * Test if logged user has finished his game or not
+     * @return boolean
+     */
+    public static boolean testGameFinished(){
+        if(userLogged != null && userLogged.isGameFinished()){
+            System.out.println("You already finished your game");
+            return true;
+        }
+        return false;
     }
 }
