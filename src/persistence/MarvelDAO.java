@@ -26,6 +26,22 @@ public class MarvelDAO {
     private Connection connection;
        
     
+    /**
+     * When the player gets a new gem, database gem is updated
+     * @param user User
+     * @param gem String
+     */
+    public void updateGems(User user, String gem) throws SQLException{
+        Statement st = connection.createStatement();
+        String username = user.getName();
+        String update = "update gem set owner = '"+user.getName()+"', place = '"+user.getPlace().getName()+
+                "' where name = '"+gem+"' and user = '"+user.getName()+"'";
+        st.executeUpdate(update);
+        st.close();
+    }
+    
+  //  update gem set owner = "pepe", place = "New York" where name = "Mind Gem" and user = "pepe" 
+
     
     public void updateUserPlace(User user) throws SQLException{
         Statement st = connection.createStatement();
@@ -41,22 +57,31 @@ public class MarvelDAO {
      * @param place
      * @return 
      */
-    public List<Gem> getGemsByPlace(String username, String place) throws SQLException, MarvelException{
+    public List<Gem> getGemsByPlace(User player) throws SQLException, MarvelException{
         //basta con pasar al userrrr
-        List<Gem> gemsFree = new ArrayList<>();
+        List<Gem> gems = new ArrayList<>();
         Statement st = connection.createStatement();
-        String query = "select * from gem where place='" + place + "' and user='" + username + "';";
+        String query = "select * from gem where place='" + player.getPlace().getName() + "' and user='" + player.getName() + "';";
         ResultSet rs = st.executeQuery(query);
         while (rs.next()) {
             Gem gem = new Gem();
-            fillGem1(gem, rs, username, place);
-            gemsFree.add(gem);
+            fillGem1(gem, rs, player.getName(), player.getPlace().getName());
+            gems.add(gem);
         }
         rs.close();
         st.close();
-        return gemsFree;
+        return gems;
     }
     
+    /**
+     * 
+     * @param gem
+     * @param rs
+     * @param username
+     * @param place
+     * @throws SQLException
+     * @throws MarvelException 
+     */
     public void fillGem1(Gem gem, ResultSet rs, String username, String place) throws SQLException, MarvelException{
         gem.setName(rs.getString("name"));
         gem.setUser(userByName(username));
@@ -87,11 +112,13 @@ public class MarvelDAO {
     
     public Enemy enemyByName(String name) throws SQLException, MarvelException {
         Statement st = connection.createStatement();
-        String query = "select * from enemy where username='" + name + "';";
+        String query = "select * from enemy where name='" + name + "';";
         ResultSet rs = st.executeQuery(query);
         boolean exist = rs.next();
         Enemy e = new Enemy();
-        fillEnemy(e, rs);
+        if(exist){
+           fillEnemy(e, rs);
+        }
         rs.close();
         st.close();
         return e;
@@ -111,6 +138,7 @@ public class MarvelDAO {
         }
         User u = new User();
         fillUser(rs, u);
+        //here we add to the user object the gems owned
         u.setGemsOwned(currentGemsOwned(u));
         rs.close();
         st.close();

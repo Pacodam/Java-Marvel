@@ -37,13 +37,54 @@ public class Manager {
       // TODO
   }
   
+  /**
+     * Receives two spock/scissor/paper/rock/lizard options, returns 1 if wins
+     * option1, 2 in the other case, or 0 if nobody wins
+     * @param opt1 String
+     * @param opt2 String
+     * @return int
+     */
+    public int pppGame(String opt1, String opt2){
+        switch(opt1){
+            case "spock":
+                if(opt2.equals("scissor") || opt2.equals("lizard")){return 1; }
+                if(opt2.equals("paper") || opt2.equals("rock")){ return 2;}
+                break;
+            case "scissor":
+                if(opt2.equals("scissor") || opt2.equals("lizard")){return 1; }
+                if(opt2.equals("paper") || opt2.equals("rock")){ return 2;}
+                break;
+            case "paper":
+                if(opt2.equals("scissor") || opt2.equals("lizard")){return 1; }
+                if(opt2.equals("paper") || opt2.equals("rock")){ return 2;}
+                break;
+            case "rock":
+                if(opt2.equals("scissor") || opt2.equals("lizard")){return 1; }
+                if(opt2.equals("paper") || opt2.equals("rock")){ return 2;}
+                break;
+            case "lizard":
+        }
+        return 0;
+    }
   
+  public Enemy getEnemyHere(User userLogged, String enemyName) throws SQLException, MarvelException{
+      marvelDAO.connect();
+      Enemy e = marvelDAO.enemyByName(enemyName);
+      marvelDAO.disconnect();
+      System.out.println(e);
+      if(e == null){
+          throw new MarvelException(MarvelException.ENEMY_NO_EXISTS_HERE);
+      }
+      if(!e.getPlace().getName().equals(userLogged.getPlace().getName())){
+          throw new MarvelException(MarvelException.ENEMY_NO_EXISTS_HERE);
+      }
+      return e;
+  }
   
   public void getFreeGem(User player, String gem) throws SQLException, MarvelException{
       marvelDAO.connect();
-      //first we get gems in player actual place
-      List<Gem> gemsInPlace = marvelDAO.getGemsByPlace(player.getName(), player.getPlace().getName());
-      marvelDAO.disconnect();
+      //first we get gems in player actual place (all of them)
+      List<Gem> gemsInPlace = marvelDAO.getGemsByPlace(player);
       //1) we check the name of the gem and check if it is free
       boolean existsGem = false;
       boolean gemIsFree = false;
@@ -57,12 +98,14 @@ public class Manager {
           }  
       }
       //2) we check if some error must be throwed
-      if(!existsGem){
+      if(!existsGem || !gemIsFree){
           throw new MarvelException(MarvelException.NO_GEM_NAME);
+      } 
+      else{
+          //3. Update database gem table
+          marvelDAO.updateGems(player, gem);
       }
-      if(!gemIsFree){
-          throw new MarvelException(MarvelException.NO_GEM_NAME);
-      }   
+       marvelDAO.disconnect();
   }
   
   
@@ -122,9 +165,9 @@ public class Manager {
       return directions;
   }
     
-  public List<String> getGemsByPlace(String username, String place)  throws SQLException, MarvelException {
+  public List<String> getGemsByPlace(User player)  throws SQLException, MarvelException {
        marvelDAO.connect();
-       List<Gem> gems = marvelDAO.getGemsByPlace(username, place);
+       List<Gem> gems = marvelDAO.getGemsByPlace(player);
        marvelDAO.disconnect();
        List<String> gemsHere = new ArrayList<>();
        //we only want gems not owned by anyone
@@ -153,6 +196,9 @@ public class Manager {
       //check if username and password is correct
       marvelDAO.connect();
       User u = marvelDAO.loginCheck(username, password);
+      if(u.getGemsOwned().size() == 6){
+          u.setGameFinished(true);
+      }
       marvelDAO.disconnect();
       return u;
   }

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.List;
+import model.Enemy;
 import model.Place;
 import model.Superhero;
 import model.User;
@@ -75,7 +76,9 @@ public class Marvel {
                     case "w":   //desplazamiento, length 1, login
                         testLength(1);
                         testLogin();
-                        move();
+                        if(!testGameFinished()){
+                           move();
+                        }
                         break;
                     case "d": //borrar usuario, length 2, login
                         testLength(2);
@@ -151,9 +154,13 @@ public class Marvel {
     public static void getGem() throws SQLException, MarvelException {
        
         String gem = input[1] + " " + input[2];
+        //the manager will add the new gem to the user in the database, or return an exception if any problem is found
         manager.getFreeGem(userLogged, gem);
+        System.out.println("You have got the gem");
+        //time to check if the player owns the 6 gems already
         if(userLogged.getGemsOwned().size() < 6){
-            System.out.println("");
+            System.out.println("YOU WINN!! YOU HAVE ALL GEMS!!");
+            userLogged.setGameFinished(true);
         }
         
         
@@ -162,9 +169,16 @@ public class Marvel {
     /**
      * 
      */
-    public static void battle() {
+    public static void battle() throws SQLException, MarvelException {
+        Enemy enemy = manager.getEnemyHere(userLogged, input[1]);
+        
+        String[] options = {"spock","scissor","paper","rock","lizard"};
+        
+        //int result = manager.pppGame(opt1, opt2);
         
     }
+    
+
     
     /**
      * 
@@ -209,7 +223,7 @@ public class Marvel {
         }
         System.out.println("\n---");
         //obtain gems in user place
-        currentFreeGems = manager.getGemsByPlace(userLogged.getName(), userLogged.getPlace().getName());
+        currentFreeGems = manager.getGemsByPlace(userLogged);
         if(currentFreeGems.isEmpty()){
             System.out.println("There are no gems here");
         }
@@ -249,4 +263,35 @@ public class Marvel {
             throw new MarvelException(MarvelException.NOT_LOGGED);
         }
     }
+    
+    /**
+     * Test if logged user has finished his game or not
+     * @return boolean
+     */
+    public static boolean testGameFinished(){
+        if(userLogged != null && userLogged.isGameFinished()){
+            System.out.println("You already finished your game");
+            return true;
+        }
+        return false;
+    }
 }
+
+
+/* public class ThreadManager implements runnable
+   private HotelManager;
+  private int milis;
+En esta clase es donde estará la lógica del thread. 
+
+luego cuando en main hago threadManager.run() y lo instancio. Podria instanciar
+25 threads.
+
+enum
+public enum CrewSercices{
+  MANTENIMIENTO, ETC
+public static CrewServices selectService(String extra){
+   switch(extra.toUppercase(){
+      case("MANTENIMIENTO"):
+             RETURN crewServices.MANTENIMIENTO;
+case ...
+*/
