@@ -12,11 +12,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Random;
 import model.Enemy;
 import model.Place;
 import model.Superhero;
 import model.User;
 import model.gems.Gem;
+
 
 /**
  *
@@ -28,6 +30,7 @@ public class Marvel {
     private static String[] input; //the line currently readed
     
     private static User userLogged;
+    private static Enemy enemy;  //for battles
     private static List<String> currentDirections;
     private static List<String> currentFreeGems;
     
@@ -170,16 +173,63 @@ public class Marvel {
      * 
      */
     public static void battle() throws SQLException, MarvelException {
-        Enemy enemy = manager.getEnemyHere(userLogged, input[1]);
-        
-        String[] options = {"spock","scissor","paper","rock","lizard"};
-        
-        //int result = manager.pppGame(opt1, opt2);
-        
+        enemy = manager.getEnemyHere(userLogged, input[1]);
+        System.out.println("- Fight begins -");
+        int attkUser = userLogged.getLevel();
+        int attkEnem = enemy.getLevel();
+        int userWin = 0;
+        int enemyWin = 0;
+        while(attkUser >= 0 && attkEnem >= 0){
+            int result = attack(attkUser, attkEnem);
+            attkUser--;
+            attkEnem--;
+            switch(result){
+                case 1:
+                    System.out.println("You win");
+                    userWin++;
+                    break;
+                case 2:
+                    System.out.println(enemy.getName() + " wins");
+                    enemyWin++;
+                    break;
+                case 3:
+                    System.out.println("Nobody win");
+            } 
+        }
+        System.out.println("- FIGHT FINISHED -");
+        winner(userWin, enemyWin);
+          
     }
     
-
+    public static void winner(int userWin, int enemyWin){
+        if(userWin > enemyWin){
+            System.out.println("Player win");
+        }
+        else if(enemyWin > userWin){
+            
+        }
+        else{
+            
+        }
+    }
     
+    public static int attack(int attkUser, int attkEnem){
+        System.out.println("You got " + attkUser + " attacks");
+        System.out.println(enemy.getName() + " got "+ attkEnem + " attacks");
+        String[] options = {"spock","scissor","paper","rock","lizard"};
+        String op1 = options[randomGen(0, options.length-1)];
+        System.out.println("Player attack: "+ op1);
+        String op2 = options[randomGen(0, options.length-1)];
+        System.out.println(enemy.getName() + " attack: " + op2);
+        return manager.pppGame(op1, op2);
+    }
+    
+    public static int randomGen(int min, int max){
+        Random rand = new Random();
+        int value = rand.nextInt((max - min) + 1) + min;
+        return value;
+    }
+
     /**
      * 
      */

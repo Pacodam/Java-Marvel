@@ -71,11 +71,10 @@ public class Manager {
       marvelDAO.connect();
       Enemy e = marvelDAO.enemyByName(enemyName);
       marvelDAO.disconnect();
-      System.out.println(e);
-      if(e == null){
+      if(e.getPlace() == null){
           throw new MarvelException(MarvelException.ENEMY_NO_EXISTS_HERE);
       }
-      if(!e.getPlace().getName().equals(userLogged.getPlace().getName())){
+      else if(!e.getPlace().getName().equals(userLogged.getPlace().getName())){
           throw new MarvelException(MarvelException.ENEMY_NO_EXISTS_HERE);
       }
       return e;
