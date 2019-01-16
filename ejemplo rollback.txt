@@ -1,0 +1,12 @@
+c.setAutocommit(false);
+try {
+st.executeUpdate("insert pepe");
+st.executeUpdate("insert juan");
+c.commit();
+}catch(SQLException ex){
+c.rollback();
+throw ex;
+} finally {
+c.setAutocommit(true);
+}
+

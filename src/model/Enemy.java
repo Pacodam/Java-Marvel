@@ -5,6 +5,9 @@
  */
 package model;
 
+import java.util.List;
+import model.gems.Gem;
+
 /**
  *
  * @author alu2017454
@@ -12,7 +15,8 @@ package model;
 public class Enemy extends Oponent {
     
     private String debility;
-    private Place place;
+    
+    private List<Gem> gemsOwned;
     
     public Enemy() {}
     
@@ -28,6 +32,16 @@ public class Enemy extends Oponent {
     public void setDebility(String debility) {
         this.debility = debility;
     }
+
+    public List<Gem> getGemsOwned() {
+        return gemsOwned;
+    }
+
+    public void setGemsOwned(List<Gem> gemsOwned) {
+        this.gemsOwned = gemsOwned;
+    }
+    
+    
 
     @Override
     public String toString() {

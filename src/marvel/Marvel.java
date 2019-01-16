@@ -175,14 +175,23 @@ public class Marvel {
     public static void battle() throws SQLException, MarvelException {
         enemy = manager.getEnemyHere(userLogged, input[1]);
         System.out.println("- Fight begins -");
+        //the number of attacks of each opponent
         int attkUser = userLogged.getLevel();
         int attkEnem = enemy.getLevel();
+        //number of attk winned by each opponent
         int userWin = 0;
         int enemyWin = 0;
-        while(attkUser >= 0 && attkEnem >= 0){
+        while(attkUser > 0  || attkEnem > 0){
+            
+            //result gets 1 if wins player, 2 if wins enemy, 0 if nobody wins
+            //we used attack method for this
+            
             int result = attack(attkUser, attkEnem);
-            attkUser--;
-            attkEnem--;
+            
+            //the attacks are minored by one, only if attack it's > 0
+            if(attkUser > 0){ attkUser--;}
+            if(attkEnem > 0) { attkEnem--;}
+  
             switch(result){
                 case 1:
                     System.out.println("You win");
@@ -192,25 +201,68 @@ public class Marvel {
                     System.out.println(enemy.getName() + " wins");
                     enemyWin++;
                     break;
-                case 3:
+                case 0:
                     System.out.println("Nobody win");
             } 
         }
         System.out.println("- FIGHT FINISHED -");
+        //the method winner does the rest 
         winner(userWin, enemyWin);
           
     }
     
     public static void winner(int userWin, int enemyWin){
+        System.out.print(userLogged.getName() + ": "+ userWin + " wins. - ");
+        System.out.print(enemy.getName() + ": "+ enemyWin + " wins.\n");
+       
+        /*     Si gana el usuario (su número de victorias es mayor a la del villano) 
+        y al villano no le quedan ataques, el usuario ganará 5 puntos. 
+        En caso de que el villano tuviese gemas, las perdería y quedarías libres
+        en el lugar donde se encuentran. El villano huiría a un lugar diferente. */
+       
+        /*      Si el jugador ha ganado, al subir los puntos se comprobará 
+        si ha llegado a 50. Si es así, subirá de nivel y se reiniciará el 
+        contador de puntos a 0, o con los puntos sobrantes en caso de superar los 50.
+        En caso de que pierda se debe tener en cuenta que los puntos nunca 
+        pueden ser negativos. */
+
         if(userWin > enemyWin){
-            System.out.println("Player win");
+            System.out.println(userLogged.getName() + " win");
+            
+            userLogged.setPoints(userLogged.getPoints() + 5);
+            if(userLogged.getPoints() >= 50){
+                int diff = userLogged.getLevel() - 50;
+                userLogged.setLevel(userLogged.getLevel() + 1);
+                userLogged.setPoints(diff);
+            }
+            
+           
+            
+            
         }
+         /*Si gana el villano y al usuario no le quedan ataques, el usuario
+        pierde 2 puntos y en caso de tener gemas, pasarían a ser propiedad 
+        del villano. El villano se desplazaría a otro lugar y se llevaría 
+        las gemas con él. */
         else if(enemyWin > userWin){
-            
+            System.out.println(enemy.getName() + " win");
+            if(userLogged.getPoints() >= 2){
+                userLogged.setPoints(userLogged.getPoints() - 2);
+            }
+            userLogged.setGameFinished(true);
         }
+        
+         /*En caso de empate, sin ataques por parte de ninguno de los lados,
+        el villano huiría a otro lugar y no afectaría ni a gemas ni a puntos
+        de nadie. */
         else{
-            
+            System.out.println("Nobody win");
         }
+        
+        System.out.println("num of gems " + enemy.getGemsOwned().size());
+        for(Gem g: enemy.getGemsOwned()){
+                System.out.println(g.getName());
+            }
     }
     
     public static int attack(int attkUser, int attkEnem){

@@ -69,7 +69,7 @@ public class Manager {
   
   public Enemy getEnemyHere(User userLogged, String enemyName) throws SQLException, MarvelException{
       marvelDAO.connect();
-      Enemy e = marvelDAO.enemyByName(enemyName);
+      Enemy e = marvelDAO.enemyByName(userLogged, enemyName);
       marvelDAO.disconnect();
       if(e.getPlace() == null){
           throw new MarvelException(MarvelException.ENEMY_NO_EXISTS_HERE);

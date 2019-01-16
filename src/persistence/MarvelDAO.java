@@ -93,7 +93,7 @@ public class MarvelDAO {
             gem.setOponent(userByName(username));
         }
         else{
-           gem.setOponent(enemyByName(owner)) ;
+           gem.setOponent(enemyByName(userByName(username),owner)) ;
         }
         gem.setPlace(getPlaceByName(place));
     }
@@ -110,7 +110,7 @@ public class MarvelDAO {
         return u;
     }
     
-    public Enemy enemyByName(String name) throws SQLException, MarvelException {
+    public Enemy enemyByName(User userLogged, String name) throws SQLException, MarvelException {
         Statement st = connection.createStatement();
         String query = "select * from enemy where name='" + name + "';";
         ResultSet rs = st.executeQuery(query);
@@ -121,7 +121,33 @@ public class MarvelDAO {
         }
         rs.close();
         st.close();
+        //we add gems owned by enemy
+        e.setGemsOwned(currentGemsOwnedByEnemy(userLogged, e));
         return e;
+    }
+    
+    public List<Gem> currentGemsOwnedByEnemy(User userLogged, Enemy e) throws SQLException, MarvelException{
+        List<Gem> gemsOwned = new ArrayList<>();
+        Statement st = connection.createStatement();
+        System.out.println("user name: "+ userLogged.getName() + " enemy " + e.getName());
+        String query = "select * from gem where user = '" + userLogged.getName() + "' and owner ='" + e.getName() + "';";
+        ResultSet rs = st.executeQuery(query);
+        while (rs.next()) {
+            Gem g = new Gem();
+            fillGem3(userLogged, e, g, rs);
+            gemsOwned.add(g);
+            System.out.println("gem name: " + g.getName());
+        }
+        rs.close();
+        st.close();
+        return gemsOwned;
+    }
+    
+    public void fillGem3(User userLogged, Enemy e, Gem g, ResultSet rs) throws SQLException, MarvelException{
+        g.setName(rs.getString("name"));
+        g.setUser(userLogged);
+        g.setOponent(e);
+        g.setPlace(getPlaceByName(rs.getString("place")));
     }
     
     
@@ -152,7 +178,7 @@ public class MarvelDAO {
         ResultSet rs = st.executeQuery(query);
         while (rs.next()) {
             Gem g = new Gem();
-            fillGem2(g, rs);
+            fillGem2(u, g, rs);
             gemsOwned.add(g);
         }
         rs.close();
@@ -160,7 +186,7 @@ public class MarvelDAO {
         return gemsOwned;
     }
     
-    public void fillGem2(Gem gem, ResultSet rs) throws SQLException, MarvelException{
+    public void fillGem2(User u, Gem gem, ResultSet rs) throws SQLException, MarvelException{
         String user = rs.getString("user");
         gem.setName(rs.getString("name"));
         gem.setUser(userByName(user));
@@ -172,7 +198,7 @@ public class MarvelDAO {
             gem.setOponent(userByName(user));
         }
         else{
-           gem.setOponent(enemyByName(owner)) ;
+           gem.setOponent(enemyByName(u,owner)) ;
         }
         gem.setPlace(getPlaceByName(rs.getString("place")));
     }
