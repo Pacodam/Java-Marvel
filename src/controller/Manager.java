@@ -33,9 +33,35 @@ public class Manager {
     }
   
   
-  public void modifyUser(User user){
-      // TODO
+  public void deleteUser(User user, String password) throws SQLException, MarvelException{
+      marvelDAO.connect();
+      marvelDAO.deleteUser(user, password);
+      marvelDAO.disconnect();
+      
   }
+  
+  public void saveDataAfterBattle(User uL, Enemy e, List<Gem> g) throws SQLException, MarvelException{
+         
+      marvelDAO.connect();
+      marvelDAO.updateBattle(uL, e, g);
+      marvelDAO.disconnect();
+  }
+  
+  public Place newPlaceForEnemy(Enemy enemy) throws SQLException, MarvelException{
+      marvelDAO.connect();
+      List<String> placesName = marvelDAO.allPlacesNamesNoEnemy(enemy);
+      String s = placesName.get(randomGen(0, placesName.size()));
+      Place p = marvelDAO.getPlaceByName(s);
+      marvelDAO.disconnect();
+      
+      return p;
+  }
+  
+   public static int randomGen(int min, int max){
+        Random rand = new Random();
+        int value = rand.nextInt((max - min) + 1) + min;
+        return value;
+    }
   
   /**
      * Receives two spock/scissor/paper/rock/lizard options, returns 1 if wins
@@ -189,6 +215,13 @@ public class Manager {
           }
       }
       return enemies;
+  }
+  
+  public List<Gem> selectAllGems(User u) throws SQLException, MarvelException{
+      marvelDAO.connect();
+      List<Gem> gems = marvelDAO.selectAllGems(u);
+      marvelDAO.disconnect();
+      return gems;
   }
   
   public User userLogin(String username, String password) throws SQLException, MarvelException{

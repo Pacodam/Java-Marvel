@@ -41,6 +41,10 @@ public class Enemy extends Oponent {
         this.gemsOwned = gemsOwned;
     }
     
+    public void addGem(Gem gem){
+        this.gemsOwned.add(gem);
+    }
+    
     
 
     @Override

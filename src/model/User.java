@@ -40,6 +40,7 @@ public class User extends Oponent {
     public void setGemsOwned(List<Gem> gemsOwned) {
         this.gemsOwned = gemsOwned;
     }
+    
 
     public boolean isGameFinished() {
         return gameFinished;

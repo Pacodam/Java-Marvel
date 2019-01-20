@@ -24,7 +24,105 @@ import model.gems.Gem;
 public class MarvelDAO {
     
     private Connection connection;
-       
+      
+    public void checkPass(User u, String pass) throws SQLException, MarvelException{
+        Statement st = connection.createStatement();
+        String query = "select * from user where username='" + u.getName() + "';";
+        ResultSet rs = st.executeQuery(query);
+        boolean exist = rs.next();
+        if(!rs.getString("pass").equals(pass)){
+           throw new MarvelException(MarvelException.DELETE_ABORT);
+        }  
+        rs.close();
+        st.close();
+    }
+    
+    public void deleteUser(User u, String pass) throws SQLException, MarvelException{
+        checkPass(u, pass);
+        Statement st = connection.createStatement();
+        connection.setAutoCommit(false);
+        try{
+            String deleteUser = "delete from user where username = '"+ u.getName()+"'";
+            String deleteGems = "delete from gem where user = '"+u.getName()+"'";
+            st.executeUpdate(deleteUser);
+            st.executeUpdate(deleteGems);
+            connection.commit(); 
+        }catch(SQLException err){
+            connection.rollback();
+            throw new SQLException();
+        }finally {
+            connection.setAutoCommit(true);
+            st.close();
+        }  
+    }
+    
+    public void updateBattle(User u, Enemy e, List<Gem> g) throws SQLException{
+        
+        Statement st = connection.createStatement();
+        connection.setAutoCommit(false);
+        try{
+            String updateUser = "update user set points ='" + u.getPoints() + "', level = "
+                    + "'"+ u.getLevel() + "' where username='"+ u.getName() + "'";
+            String updateEnemy = "update enemy set place ='" + e.getPlace().getName() + 
+                    "' where name='"+ e.getName() + "'";
+            st.executeUpdate(updateUser);
+            st.executeUpdate(updateEnemy);
+            //updateGems(g, u.getName());
+            connection.commit();
+        }catch(SQLException err){
+            connection.rollback();
+            throw new SQLException();
+        }finally {
+            connection.setAutoCommit(true);
+        }      
+    }
+    
+    /*
+    public void updateGems(List<Gem> newGems, String user) throws SQLException {
+        for(Gem g: newGems){
+            String update = "update gem set owner = '"+ g.getOponentName() +"', place = '"+user.getPlace().getName()+
+                "' where name = '"+gem+"' and user = '"+user.getName()+"'";
+            ps.setString(1, g.getName());
+            ps.setString(2, g.getUser().getName());
+            //A gem can have a null owner at the beginning
+            if(g.getOponent() != null){
+              ps.setString(3, g.getOponent().getName());
+            }
+            else{
+               ps.setNull(3, java.sql.Types.VARCHAR);
+            }
+            ps.setString(4, g.getPlace().getName());
+            ps.executeUpdate();
+            ps.close();
+        }
+    }
+    */
+    
+    public List<Gem> selectAllGems(User u) throws SQLException, MarvelException{
+        List<Gem> gems = new ArrayList<>();
+        Statement st = connection.createStatement();
+        String select = "select * from gem where user = '" + u.getName() + "'";
+        ResultSet rs = st.executeQuery(select);
+        while (rs.next()) {
+            Gem g = new Gem();
+            fillGem2(u, g, rs);
+            gems.add(g);
+        }
+        rs.close();
+        st.close();
+        return gems;
+    }
+
+    public List<String> allPlacesNamesNoEnemy(Enemy e) throws SQLException {
+        List<String> placesNames = new ArrayList<>();
+        Statement st = connection.createStatement();
+        String query = "select name from place where name != '" + e.getPlace().getName()+"'";
+        ResultSet rs = st.executeQuery(query);
+        while(rs.next()){
+            placesNames.add(rs.getString("name"));
+        }
+        return placesNames;
+    }
     
     /**
      * When the player gets a new gem, database gem is updated
@@ -129,14 +227,14 @@ public class MarvelDAO {
     public List<Gem> currentGemsOwnedByEnemy(User userLogged, Enemy e) throws SQLException, MarvelException{
         List<Gem> gemsOwned = new ArrayList<>();
         Statement st = connection.createStatement();
-        System.out.println("user name: "+ userLogged.getName() + " enemy " + e.getName());
+        //System.out.println("user name: "+ userLogged.getName() + " enemy " + e.getName());
         String query = "select * from gem where user = '" + userLogged.getName() + "' and owner ='" + e.getName() + "';";
         ResultSet rs = st.executeQuery(query);
         while (rs.next()) {
             Gem g = new Gem();
             fillGem3(userLogged, e, g, rs);
             gemsOwned.add(g);
-            System.out.println("gem name: " + g.getName());
+            //System.out.println("gem name: " + g.getName());
         }
         rs.close();
         st.close();

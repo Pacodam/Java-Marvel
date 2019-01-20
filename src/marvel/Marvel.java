@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import model.Enemy;
@@ -31,6 +32,7 @@ public class Marvel {
     
     private static User userLogged;
     private static Enemy enemy;  //for battles
+    private static List<Gem> allGems; 
     private static List<String> currentDirections;
     private static List<String> currentFreeGems;
     
@@ -147,8 +149,13 @@ public class Marvel {
         //check username and password for login, we receive a Player object
         //when user logs on the game, his gems owned are included on the User created
         userLogged = manager.userLogin(username, password);
+        allGems = manager.selectAllGems(userLogged);
         System.out.println("Welcome, "+ userLogged.getName());
         showPlaceInfo();
+        
+        for(Gem g: allGems){
+            System.out.println(" proof " + g.toString());
+        }
     }
     
     /**
@@ -177,6 +184,10 @@ public class Marvel {
         System.out.println("- Fight begins -");
         //the number of attacks of each opponent
         int attkUser = userLogged.getLevel();
+        //if user superpower equals enemy debility, user increases 1 attack
+        if(userLogged.getSuperhero().getSuperpower().equals(enemy.getDebility())){
+            attkUser++;
+        }
         int attkEnem = enemy.getLevel();
         //number of attk winned by each opponent
         int userWin = 0;
@@ -211,13 +222,14 @@ public class Marvel {
           
     }
     
-    public static void winner(int userWin, int enemyWin){
+    public static void winner(int userWin, int enemyWin) throws SQLException, MarvelException{
+        //wins stats results
         System.out.print(userLogged.getName() + ": "+ userWin + " wins. - ");
         System.out.print(enemy.getName() + ": "+ enemyWin + " wins.\n");
        
         /*     Si gana el usuario (su número de victorias es mayor a la del villano) 
         y al villano no le quedan ataques, el usuario ganará 5 puntos. 
-        En caso de que el villano tuviese gemas, las perdería y quedarías libres
+        En caso de que el villano tuviese gemas, las perdería y quedarían libres
         en el lugar donde se encuentran. El villano huiría a un lugar diferente. */
        
         /*      Si el jugador ha ganado, al subir los puntos se comprobará 
@@ -229,27 +241,73 @@ public class Marvel {
         if(userWin > enemyWin){
             System.out.println(userLogged.getName() + " win");
             
+             //TODO: with allGems ¿do we really need getGemsOwned() method?
+             //if enemy got gems, he loses them
+            for(Gem g: allGems){
+                if(g.getOponentName().equals(enemy.getName())){
+                    g.setOponent(null);
+                }
+            }
+            //this can be deleted...
+            if(enemy.getGemsOwned().size() > 0){
+               System.out.println("The enemy has lost their gems");
+               for(Gem g: enemy.getGemsOwned()){
+                   System.out.println(g.getName());
+               }
+               enemy.setGemsOwned(new ArrayList<Gem>());
+            }
+            
+            //update of user stats
             userLogged.setPoints(userLogged.getPoints() + 5);
+            System.out.println("You win 5 points.");
+            System.out.println("Your points: "+ userLogged.getPoints());
             if(userLogged.getPoints() >= 50){
                 int diff = userLogged.getLevel() - 50;
                 userLogged.setLevel(userLogged.getLevel() + 1);
+                System.out.println("INCREASED LEVEL! Your level now is " + userLogged.getLevel() );
                 userLogged.setPoints(diff);
+                System.out.println("Your points now: " + userLogged.getPoints());
             }
-            
            
-            
-            
+            //enemy goes to another place (random)
+            enemy.setPlace(manager.newPlaceForEnemy(enemy));
+            System.out.println(enemy.getName() + " has disappeared");
+             
         }
          /*Si gana el villano y al usuario no le quedan ataques, el usuario
         pierde 2 puntos y en caso de tener gemas, pasarían a ser propiedad 
         del villano. El villano se desplazaría a otro lugar y se llevaría 
         las gemas con él. */
+        
         else if(enemyWin > userWin){
             System.out.println(enemy.getName() + " win");
+            
+            for(Gem g: allGems){
+                if(g.getOponentName().equals(userLogged.getName())){
+                    g.setOponent(enemy);
+                }
+            }
+            //TODO
+            //the gems from player goes to enemy POSSIBLE DELETE
+            if(userLogged.getGemsOwned().size() > 0){
+                System.out.println("The enemy has stolen your gems");
+                List<Gem> gemsPlayer = userLogged.getGemsOwned();
+                for(Gem g: gemsPlayer){
+                  enemy.addGem(g);
+                  System.out.println(g.getName());
+                }
+                userLogged.setGemsOwned(new ArrayList<Gem>()); 
+            }
+           
+            
+            //update of user stats
             if(userLogged.getPoints() >= 2){
                 userLogged.setPoints(userLogged.getPoints() - 2);
             }
-            userLogged.setGameFinished(true);
+            
+            //enemy goes to another place
+            enemy.setPlace(manager.newPlaceForEnemy(enemy)); 
+            System.out.println(enemy.getName() + " has disappeared");
         }
         
          /*En caso de empate, sin ataques por parte de ninguno de los lados,
@@ -257,12 +315,18 @@ public class Marvel {
         de nadie. */
         else{
             System.out.println("Nobody win");
+            //enemy goes to another place (random)
+            enemy.setPlace(manager.newPlaceForEnemy(enemy));
+            System.out.println(enemy.getName() + " has disappeared");
         }
         
-        System.out.println("num of gems " + enemy.getGemsOwned().size());
-        for(Gem g: enemy.getGemsOwned()){
-                System.out.println(g.getName());
-            }
+        for(Gem g: allGems){
+            System.out.println(" proof 2 " + g.toString());
+        }
+        
+        //new information is saved into database (enemy, user, gem tables)
+        manager.saveDataAfterBattle(userLogged, enemy, allGems);
+        
     }
     
     public static int attack(int attkUser, int attkEnem){
@@ -282,9 +346,7 @@ public class Marvel {
         return value;
     }
 
-    /**
-     * 
-     */
+    
     public static void move() throws MarvelException, SQLException {
         String direction = input[0];
         if(!currentDirections.contains(direction.toUpperCase())){
@@ -297,8 +359,15 @@ public class Marvel {
         manager.updateUserPlace(userLogged);
     }
     
-    public static void delete() {
-        
+    /**
+     * Deletes a user
+     * @throws SQLException
+     * @throws MarvelException 
+     */
+    public static void delete() throws SQLException, MarvelException {
+        manager.deleteUser(userLogged, input[1]);
+        System.out.println("User deleted");
+        userLogged = null;
     }
     
     /**
