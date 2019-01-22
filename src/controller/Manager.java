@@ -13,6 +13,7 @@ import java.util.Random;
 import model.Enemy;
 import model.Oponent;
 import model.Place;
+import model.Rank;
 import model.Superhero;
 import model.User;
 import model.gems.Gem;
@@ -31,6 +32,15 @@ public class Manager {
     public Manager() {
         marvelDAO = new MarvelDAO();  
     }
+  
+ 
+  public List<Rank> getRankings() throws SQLException{
+      List<Rank> rankings;
+      marvelDAO.connect();
+      rankings = marvelDAO.getRankings();
+      marvelDAO.disconnect();
+      return rankings;
+  }
   
   
   public void deleteUser(User user, String password) throws SQLException, MarvelException{

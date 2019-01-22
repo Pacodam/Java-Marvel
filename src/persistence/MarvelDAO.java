@@ -17,6 +17,7 @@ import java.util.List;
 import model.Enemy;
 import model.Oponent;
 import model.Place;
+import model.Rank;
 import model.Superhero;
 import model.User;
 import model.gems.Gem;
@@ -24,6 +25,11 @@ import model.gems.Gem;
 public class MarvelDAO {
     
     private Connection connection;
+    
+    public List<Rank> getRankings() throws SQLException{
+        Statement st = connection.createStatement();
+        
+    }
       
     public void checkPass(User u, String pass) throws SQLException, MarvelException{
         Statement st = connection.createStatement();
