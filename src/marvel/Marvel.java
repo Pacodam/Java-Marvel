@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Random;
 import model.Enemy;
 import model.Place;
+import model.Rank;
 import model.Superhero;
 import model.User;
 import model.gems.Gem;
@@ -373,8 +374,17 @@ public class Marvel {
     /**
      * 
      */
-    public static void ranking() {
-        
+    public static void ranking() throws SQLException {
+        List<Rank> rankings = manager.getRankings();
+        if(rankings.size() == 0){
+            System.out.println("There are no users for the rankings (nobody has gems)");
+        }
+        else{
+            System.out.println("- Ranking -");
+            for(Rank r: rankings){
+                System.out.println(r.toString());
+            }
+        }
     }
     
     public static void showPlaceInfo() throws SQLException, MarvelException{

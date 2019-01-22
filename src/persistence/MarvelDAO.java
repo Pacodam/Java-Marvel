@@ -17,6 +17,7 @@ import java.util.List;
 import model.Enemy;
 import model.Oponent;
 import model.Place;
+import model.Rank;
 import model.Superhero;
 import model.User;
 import model.gems.Gem;
@@ -24,7 +25,55 @@ import model.gems.Gem;
 public class MarvelDAO {
     
     private Connection connection;
+    
+    /**
+     * Query to obtain rankings
+     *  select username, superhero, count(owner) as 'gems', level, points
+         from user inner join gem on username = owner
+         group by username
+         order by gems desc
+     * @return
+     * @throws SQLException 
+     */
+    public List<Rank> getRankings() throws SQLException{
+        List<Rank> ranking = new ArrayList<>();
+        Statement st = connection.createStatement();
+        String query = "select username, superhero, count(owner) as 'gems', level, points"
+                + " from user inner join gem on username = owner"
+                + " group by username"
+                + " order by gems desc";
+        ResultSet rs = st.executeQuery(query);
+        while (rs.next()) {
+            Rank r = new Rank();
+            fillRank(r, rs);
+            ranking.add(r);
+        }
+        rs.close();
+        st.close();
+        return ranking;        
+    }
+    
+    /**
+     * Fill Rank objects
+     * @param r
+     * @param rs
+     * @throws SQLException 
+     */
+    public void fillRank(Rank r, ResultSet rs) throws SQLException{
+        r.setUser(rs.getString("username"));
+        r.setSuperhero(rs.getString("superhero"));
+        r.setNumGems(rs.getInt("gems"));
+        r.setLevel(rs.getInt("level"));
+        r.setPoints(rs.getInt("points"));
+    }
       
+    /**
+     * Pass check for deleting
+     * @param u User
+     * @param pass String
+     * @throws SQLException
+     * @throws MarvelException 
+     */
     public void checkPass(User u, String pass) throws SQLException, MarvelException{
         Statement st = connection.createStatement();
         String query = "select * from user where username='" + u.getName() + "';";
@@ -37,6 +86,13 @@ public class MarvelDAO {
         st.close();
     }
     
+    /**
+     * Deletes user from database
+     * @param u User
+     * @param pass String
+     * @throws SQLException
+     * @throws MarvelException 
+     */
     public void deleteUser(User u, String pass) throws SQLException, MarvelException{
         checkPass(u, pass);
         Statement st = connection.createStatement();
@@ -56,6 +112,13 @@ public class MarvelDAO {
         }  
     }
     
+    /**
+     * Update User, Enemy and gems after battle
+     * @param u User
+     * @param e Enemy
+     * @param g List Gem
+     * @throws SQLException 
+     */
     public void updateBattle(User u, Enemy e, List<Gem> g) throws SQLException{
         
         Statement st = connection.createStatement();
@@ -98,6 +161,13 @@ public class MarvelDAO {
     }
     */
     
+    /**
+     * Selects all gems by User
+     * @param u user
+     * @return List Gem
+     * @throws SQLException
+     * @throws MarvelException 
+     */
     public List<Gem> selectAllGems(User u) throws SQLException, MarvelException{
         List<Gem> gems = new ArrayList<>();
         Statement st = connection.createStatement();
@@ -113,6 +183,12 @@ public class MarvelDAO {
         return gems;
     }
 
+    /**
+     * Return all places where Enemy passed is not there
+     * @param e Enemy
+     * @return List String
+     * @throws SQLException 
+     */
     public List<String> allPlacesNamesNoEnemy(Enemy e) throws SQLException {
         List<String> placesNames = new ArrayList<>();
         Statement st = connection.createStatement();
@@ -138,9 +214,11 @@ public class MarvelDAO {
         st.close();
     }
     
-  //  update gem set owner = "pepe", place = "New York" where name = "Mind Gem" and user = "pepe" 
-
-    
+    /**
+     * Updates the place of the User
+     * @param user User
+     * @throws SQLException 
+     */
     public void updateUserPlace(User user) throws SQLException{
         Statement st = connection.createStatement();
         String username = user.getName();
@@ -152,8 +230,8 @@ public class MarvelDAO {
     
     /**
      * returns Gem list from a given Place 
-     * @param place
-     * @return 
+     * @param player User
+     * @return list Gem
      */
     public List<Gem> getGemsByPlace(User player) throws SQLException, MarvelException{
         //basta con pasar al userrrr
@@ -172,11 +250,11 @@ public class MarvelDAO {
     }
     
     /**
-     * 
-     * @param gem
-     * @param rs
-     * @param username
-     * @param place
+     * Fill gem
+     * @param gem Gem
+     * @param rs ResultSet
+     * @param username String
+     * @param place Place
      * @throws SQLException
      * @throws MarvelException 
      */
@@ -196,6 +274,13 @@ public class MarvelDAO {
         gem.setPlace(getPlaceByName(place));
     }
     
+    /**
+     * Returns User from a query by a username
+     * @param username String
+     * @return User
+     * @throws SQLException
+     * @throws MarvelException 
+     */
     public User userByName(String username) throws SQLException, MarvelException{
         Statement st = connection.createStatement();
         String query = "select * from user where username='" + username + "';";
@@ -208,6 +293,14 @@ public class MarvelDAO {
         return u;
     }
     
+    /**
+     * Returns Enemy from a query by his name
+     * @param userLogged
+     * @param name
+     * @return
+     * @throws SQLException
+     * @throws MarvelException 
+     */
     public Enemy enemyByName(User userLogged, String name) throws SQLException, MarvelException {
         Statement st = connection.createStatement();
         String query = "select * from enemy where name='" + name + "';";
