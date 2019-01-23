@@ -13,7 +13,7 @@ public class Rank {
     
     private String user;
     private String superhero;
-    private String numGems;
+    private int numGems;
     private int level;
     private int points;
     
@@ -27,7 +27,7 @@ public class Rank {
         this.superhero = superhero;
     }
 
-    public void setNumGems(String numGems) {
+    public void setNumGems(int numGems) {
         this.numGems = numGems;
     }
 
@@ -41,7 +41,7 @@ public class Rank {
 
     @Override
     public String toString() {
-        return "Rank{" + "user=" + user + ", superhero=" + superhero + ", numGems=" + numGems + ", level=" + level + ", points=" + points + '}';
+        return  user + "    " + superhero + "   " + numGems + "    " + level + "    " + points;
     }
     
     

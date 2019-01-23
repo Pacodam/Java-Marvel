@@ -33,7 +33,11 @@ public class Manager {
         marvelDAO = new MarvelDAO();  
     }
   
- 
+ /**
+  * Get rankings
+  * @return List Rank
+  * @throws SQLException 
+  */
   public List<Rank> getRankings() throws SQLException{
       List<Rank> rankings;
       marvelDAO.connect();
@@ -42,7 +46,13 @@ public class Manager {
       return rankings;
   }
   
-  
+  /**
+   * Delete a user
+   * @param user User
+   * @param password String
+   * @throws SQLException
+   * @throws MarvelException 
+   */
   public void deleteUser(User user, String password) throws SQLException, MarvelException{
       marvelDAO.connect();
       marvelDAO.deleteUser(user, password);
@@ -50,6 +60,14 @@ public class Manager {
       
   }
   
+  /**
+   * Persistence after battle finished
+   * @param uL User
+   * @param e Enemy
+   * @param g Gem
+   * @throws SQLException
+   * @throws MarvelException 
+   */
   public void saveDataAfterBattle(User uL, Enemy e, List<Gem> g) throws SQLException, MarvelException{
          
       marvelDAO.connect();
@@ -57,6 +75,13 @@ public class Manager {
       marvelDAO.disconnect();
   }
   
+  /**
+   * Generates a random new place for Enemy
+   * @param enemy Enemy
+   * @return Place
+   * @throws SQLException
+   * @throws MarvelException 
+   */
   public Place newPlaceForEnemy(Enemy enemy) throws SQLException, MarvelException{
       marvelDAO.connect();
       List<String> placesName = marvelDAO.allPlacesNamesNoEnemy(enemy);
@@ -67,6 +92,12 @@ public class Manager {
       return p;
   }
   
+  /**
+   * Random generator
+   * @param min int
+   * @param max int
+   * @return int
+   */
    public static int randomGen(int min, int max){
         Random rand = new Random();
         int value = rand.nextInt((max - min) + 1) + min;
@@ -87,22 +118,32 @@ public class Manager {
                 if(opt2.equals("paper") || opt2.equals("rock")){ return 2;}
                 break;
             case "scissor":
-                if(opt2.equals("scissor") || opt2.equals("lizard")){return 1; }
-                if(opt2.equals("paper") || opt2.equals("rock")){ return 2;}
+                if(opt2.equals("lizard") || opt2.equals("paper")){return 1; }
+                if(opt2.equals("spock") || opt2.equals("rock")){ return 2;}
                 break;
             case "paper":
-                if(opt2.equals("scissor") || opt2.equals("lizard")){return 1; }
-                if(opt2.equals("paper") || opt2.equals("rock")){ return 2;}
+                if(opt2.equals("rock") || opt2.equals("spock")){return 1; }
+                if(opt2.equals("paper") || opt2.equals("scissor")){ return 2;}
                 break;
             case "rock":
                 if(opt2.equals("scissor") || opt2.equals("lizard")){return 1; }
-                if(opt2.equals("paper") || opt2.equals("rock")){ return 2;}
+                if(opt2.equals("paper") || opt2.equals("spock")){ return 2;}
                 break;
             case "lizard":
+                if(opt2.equals("paper") || opt2.equals("spock")){return 1; }
+                if(opt2.equals("scissor") || opt2.equals("rock")){ return 2;}
         }
         return 0;
     }
   
+  /**
+   * Gets enemy by name present in Player space 
+   * @param userLogged User
+   * @param enemyName String
+   * @return Enemy
+   * @throws SQLException
+   * @throws MarvelException 
+   */
   public Enemy getEnemyHere(User userLogged, String enemyName) throws SQLException, MarvelException{
       marvelDAO.connect();
       Enemy e = marvelDAO.enemyByName(userLogged, enemyName);
@@ -116,6 +157,13 @@ public class Manager {
       return e;
   }
   
+  /**
+   * Get free Gem
+   * @param player User
+   * @param gem String
+   * @throws SQLException
+   * @throws MarvelException 
+   */
   public void getFreeGem(User player, String gem) throws SQLException, MarvelException{
       marvelDAO.connect();
       //first we get gems in player actual place (all of them)
@@ -144,6 +192,11 @@ public class Manager {
   }
   
   
+  /**
+   * Persistence to new User place
+   * @param user User
+   * @throws SQLException 
+   */
   public void updateUserPlace(User user) throws SQLException{
       marvelDAO.connect();
       marvelDAO.updateUserPlace(user);
@@ -151,6 +204,14 @@ public class Manager {
       
   }
   
+  /**
+   * Moves user
+   * @param direction String
+   * @param user User
+   * @return User
+   * @throws MarvelException
+   * @throws SQLException 
+   */
   public User moveUser(String direction, User user) throws MarvelException, SQLException {
       marvelDAO.connect();
       switch(direction.toLowerCase()){
@@ -179,6 +240,11 @@ public class Manager {
       return user;
   }
   
+  /**
+   * Get possible places to move
+   * @param place List
+   * @return 
+   */
   public List<String> getPlacesToGo(Place place){
       List<String> directions = new ArrayList<>();
       if(place.getNorth() != null){
@@ -200,6 +266,13 @@ public class Manager {
       return directions;
   }
     
+  /**
+   * Retuns all free gems in a given Place
+   * @param player User
+   * @return List String
+   * @throws SQLException
+   * @throws MarvelException 
+   */
   public List<String> getGemsByPlace(User player)  throws SQLException, MarvelException {
        marvelDAO.connect();
        List<Gem> gems = marvelDAO.getGemsByPlace(player);
@@ -214,6 +287,13 @@ public class Manager {
        return gemsHere;
   }
   
+  /**
+   * Gets all enemies present in a given place
+   * @param place String
+   * @return List String
+   * @throws SQLException
+   * @throws MarvelException 
+   */
   public List<String> getEnemies(String place) throws SQLException, MarvelException {
       marvelDAO.connect();
       List<Enemy> allEnemies = marvelDAO.getEnemies();
@@ -227,6 +307,13 @@ public class Manager {
       return enemies;
   }
   
+  /**
+   * Selects all gems
+   * @param u User
+   * @return List Gem
+   * @throws SQLException
+   * @throws MarvelException 
+   */
   public List<Gem> selectAllGems(User u) throws SQLException, MarvelException{
       marvelDAO.connect();
       List<Gem> gems = marvelDAO.selectAllGems(u);
@@ -234,6 +321,14 @@ public class Manager {
       return gems;
   }
   
+  /**
+   * Login user 
+   * @param username String
+   * @param password String
+   * @return User
+   * @throws SQLException
+   * @throws MarvelException 
+   */
   public User userLogin(String username, String password) throws SQLException, MarvelException{
       //check if username and password is correct
       marvelDAO.connect();
@@ -245,6 +340,11 @@ public class Manager {
       return u;
   }
   
+  /**
+   * Gets all Superhero
+   * @return List Superhero
+   * @throws SQLException 
+   */
   public List<Superhero> getSuperheroes() throws SQLException {
       marvelDAO.connect();
       List<Superhero> allHeroes = marvelDAO.selectAllHeroes();
@@ -252,6 +352,14 @@ public class Manager {
       return allHeroes; 
   }
   
+  /**
+   * Registration of a new User
+   * @param username String
+   * @param password String
+   * @param nameHeroe String
+   * @throws SQLException
+   * @throws MarvelException 
+   */
   public void registryUser(String username, String password, String nameHeroe) throws SQLException, MarvelException {
       marvelDAO.connect();
       //check if user is already registered
@@ -277,6 +385,13 @@ public class Manager {
       marvelDAO.disconnect();
   }
   
+  /**
+   * Creation of Gems
+   * @param allEnemies List Enemy
+   * @return List Gem
+   * @throws MarvelException
+   * @throws SQLException 
+   */
   public static List<Gem> createGems(List<Enemy> allEnemies) throws MarvelException, SQLException {
       List<Gem> gemsPack = new ArrayList<>();
       String[] gems = {"Mind Gem", "Power Gem", "Reality Gem", "Soul Gem", "Space Gem", "Time Gem"};

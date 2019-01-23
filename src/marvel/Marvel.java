@@ -30,7 +30,6 @@ public class Marvel {
         
     private static Manager manager;
     private static String[] input; //the line currently readed
-    
     private static User userLogged;
     private static Enemy enemy;  //for battles
     private static List<Gem> allGems; 
@@ -74,7 +73,9 @@ public class Marvel {
                     case "b":   //lucha contra villano, length 2, login
                         testLength(2);
                         testLogin();
-                        battle();
+                        if(!testGameFinished()){
+                            battle();
+                        }
                         break;
                     case "n":
                     case "s":
@@ -105,7 +106,7 @@ public class Marvel {
              }
             }catch (IOException | MarvelException | SQLException  ex) {
                 System.out.println(ex.getMessage());
-                ex.printStackTrace();
+                //ex.printStackTrace();
             }  
         }while(!input[0].equalsIgnoreCase("x"));   
     }
@@ -125,7 +126,8 @@ public class Marvel {
     }
     
     /**
-     * Case V: view superheroes
+     * View Heroes option
+     * @throws SQLException 
      */
     public static void viewHeroes() throws SQLException {
         List<Superhero> allHeroes = manager.getSuperheroes();
@@ -142,7 +144,9 @@ public class Marvel {
    
     
     /**
-     * Case L: login. 
+     * Login
+     * @throws SQLException
+     * @throws MarvelException 
      */
     public static void login() throws SQLException, MarvelException {
         String username = input[1];
@@ -151,16 +155,20 @@ public class Marvel {
         //when user logs on the game, his gems owned are included on the User created
         userLogged = manager.userLogin(username, password);
         allGems = manager.selectAllGems(userLogged);
+        if(userLogged.getGemsOwned().size() == 6){
+            userLogged.setGameFinished(true);
+            System.out.println("You already finished your game. The only thing you can do is delete your account");
+        }
+        else{
         System.out.println("Welcome, "+ userLogged.getName());
         showPlaceInfo();
-        
-        for(Gem g: allGems){
-            System.out.println(" proof " + g.toString());
         }
     }
     
     /**
-     * 
+     * Get free Gem
+     * @throws SQLException
+     * @throws MarvelException 
      */
     public static void getGem() throws SQLException, MarvelException {
        
@@ -169,7 +177,7 @@ public class Marvel {
         manager.getFreeGem(userLogged, gem);
         System.out.println("You have got the gem");
         //time to check if the player owns the 6 gems already
-        if(userLogged.getGemsOwned().size() < 6){
+        if(userLogged.getGemsOwned().size() == 6){
             System.out.println("YOU WINN!! YOU HAVE ALL GEMS!!");
             userLogged.setGameFinished(true);
         }
@@ -178,32 +186,43 @@ public class Marvel {
     }
     
     /**
-     * 
+     * Battle
+     * @throws SQLException
+     * @throws MarvelException 
      */
     public static void battle() throws SQLException, MarvelException {
+        
+        //TODO  La batalla es muy mejorable. No funciona como debería.
+        
+        //the enemy selected to battle
         enemy = manager.getEnemyHere(userLogged, input[1]);
         System.out.println("- Fight begins -");
+        
         //the number of attacks of each opponent
         int attkUser = userLogged.getLevel();
+        int attkEnem = enemy.getLevel();
+        
         //if user superpower equals enemy debility, user increases 1 attack
         if(userLogged.getSuperhero().getSuperpower().equals(enemy.getDebility())){
             attkUser++;
         }
-        int attkEnem = enemy.getLevel();
-        //number of attk winned by each opponent
+        
+        //number of rounds win by each opponent
         int userWin = 0;
         int enemyWin = 0;
+        
+        //iteration of attacks
         while(attkUser > 0  || attkEnem > 0){
             
             //result gets 1 if wins player, 2 if wins enemy, 0 if nobody wins
-            //we used attack method for this
-            
+            //we use attack method for this, that returns who wins or equal result
             int result = attack(attkUser, attkEnem);
             
             //the attacks are minored by one, only if attack it's > 0
             if(attkUser > 0){ attkUser--;}
             if(attkEnem > 0) { attkEnem--;}
   
+            //checking of who wins the round
             switch(result){
                 case 1:
                     System.out.println("You win");
@@ -218,12 +237,23 @@ public class Marvel {
             } 
         }
         System.out.println("- FIGHT FINISHED -");
+        
         //the method winner does the rest 
         winner(userWin, enemyWin);
           
     }
     
+    /**
+     * Checks winner of the battle and update stats
+     * @param userWin int
+     * @param enemyWin int
+     * @throws SQLException
+     * @throws MarvelException 
+     */
     public static void winner(int userWin, int enemyWin) throws SQLException, MarvelException{
+        
+        //if any gem gets free we add to this list
+        List<Gem> freeGems = new ArrayList<>();
         //wins stats results
         System.out.print(userLogged.getName() + ": "+ userWin + " wins. - ");
         System.out.print(enemy.getName() + ": "+ enemyWin + " wins.\n");
@@ -244,18 +274,16 @@ public class Marvel {
             
              //TODO: with allGems ¿do we really need getGemsOwned() method?
              //if enemy got gems, he loses them
-            for(Gem g: allGems){
-                if(g.getOponentName().equals(enemy.getName())){
-                    g.setOponent(null);
-                }
-            }
-            //this can be deleted...
             if(enemy.getGemsOwned().size() > 0){
-               System.out.println("The enemy has lost their gems");
-               for(Gem g: enemy.getGemsOwned()){
-                   System.out.println(g.getName());
-               }
-               enemy.setGemsOwned(new ArrayList<Gem>());
+                System.out.println("The enemy has lost their gems");
+                for(Gem g: allGems){
+                  if(g.getOponentName().equals(enemy.getName())){
+                     System.out.println(g.getName());
+                     g.setOponent(null);
+                     g.setPlace(userLogged.getPlace());
+                  }
+                }
+                enemy.setGemsOwned(new ArrayList<Gem>());
             }
             
             //update of user stats
@@ -283,24 +311,18 @@ public class Marvel {
         else if(enemyWin > userWin){
             System.out.println(enemy.getName() + " win");
             
-            for(Gem g: allGems){
-                if(g.getOponentName().equals(userLogged.getName())){
-                    g.setOponent(enemy);
-                }
-            }
-            //TODO
-            //the gems from player goes to enemy POSSIBLE DELETE
             if(userLogged.getGemsOwned().size() > 0){
-                System.out.println("The enemy has stolen your gems");
-                List<Gem> gemsPlayer = userLogged.getGemsOwned();
-                for(Gem g: gemsPlayer){
-                  enemy.addGem(g);
-                  System.out.println(g.getName());
+               System.out.println("The enemy has stolen your gems");
+               for(Gem g: allGems){
+                 if(g.getOponentName().equals(userLogged.getName())){
+                    System.out.println(g.getName());
+                    g.setOponent(enemy);
+                    enemy.addGem(g);
                 }
-                userLogged.setGemsOwned(new ArrayList<Gem>()); 
+               }
+               userLogged.setGemsOwned(new ArrayList<Gem>());
             }
            
-            
             //update of user stats
             if(userLogged.getPoints() >= 2){
                 userLogged.setPoints(userLogged.getPoints() - 2);
@@ -308,6 +330,7 @@ public class Marvel {
             
             //enemy goes to another place
             enemy.setPlace(manager.newPlaceForEnemy(enemy)); 
+            
             System.out.println(enemy.getName() + " has disappeared");
         }
         
@@ -318,11 +341,10 @@ public class Marvel {
             System.out.println("Nobody win");
             //enemy goes to another place (random)
             enemy.setPlace(manager.newPlaceForEnemy(enemy));
+            for(Gem g: enemy.getGemsOwned()){
+                g.setPlace(enemy.getPlace());
+            }
             System.out.println(enemy.getName() + " has disappeared");
-        }
-        
-        for(Gem g: allGems){
-            System.out.println(" proof 2 " + g.toString());
         }
         
         //new information is saved into database (enemy, user, gem tables)
@@ -330,6 +352,12 @@ public class Marvel {
         
     }
     
+    /**
+     * Attack inside the battle
+     * @param attkUser int
+     * @param attkEnem int
+     * @return 
+     */
     public static int attack(int attkUser, int attkEnem){
         System.out.println("You got " + attkUser + " attacks");
         System.out.println(enemy.getName() + " got "+ attkEnem + " attacks");
@@ -341,6 +369,12 @@ public class Marvel {
         return manager.pppGame(op1, op2);
     }
     
+    /**
+     * Random generator
+     * @param min int
+     * @param max int
+     * @return 
+     */
     public static int randomGen(int min, int max){
         Random rand = new Random();
         int value = rand.nextInt((max - min) + 1) + min;
@@ -348,6 +382,11 @@ public class Marvel {
     }
 
     
+    /**
+     * Move option
+     * @throws MarvelException
+     * @throws SQLException 
+     */
     public static void move() throws MarvelException, SQLException {
         String direction = input[0];
         if(!currentDirections.contains(direction.toUpperCase())){
@@ -372,9 +411,10 @@ public class Marvel {
     }
     
     /**
-     * 
+     * Ranking
+     * @throws SQLException 
      */
-    public static void ranking() {
+    public static void ranking() throws SQLException {
         List<Rank> rankings = manager.getRankings();
         if(rankings.size() == 0){
             System.out.println("There are no users for the rankings (nobody has gems)");
@@ -387,6 +427,11 @@ public class Marvel {
         }
     }
     
+    /**
+     * Shows place info after moving
+     * @throws SQLException
+     * @throws MarvelException 
+     */
     public static void showPlaceInfo() throws SQLException, MarvelException{
         System.out.println("Place: "+ userLogged.getPlace().getName());
         System.out.println("Place: "+ userLogged.getPlace().getDescription());
@@ -426,7 +471,7 @@ public class Marvel {
     
     /**
      * Test the required length for the input order.
-     * @param length
+     * @param length int
      * @throws MarvelException - Incorrect number of arguments.
      */
     public static void testLength(int length) throws MarvelException{
@@ -459,20 +504,3 @@ public class Marvel {
 }
 
 
-/* public class ThreadManager implements runnable
-   private HotelManager;
-  private int milis;
-En esta clase es donde estará la lógica del thread. 
-
-luego cuando en main hago threadManager.run() y lo instancio. Podria instanciar
-25 threads.
-
-enum
-public enum CrewSercices{
-  MANTENIMIENTO, ETC
-public static CrewServices selectService(String extra){
-   switch(extra.toUppercase(){
-      case("MANTENIMIENTO"):
-             RETURN crewServices.MANTENIMIENTO;
-case ...
-*/
